@@ -1,9 +1,10 @@
 
 "use client"
 import { baseUrl } from "@/app/utils/Constant";
-const token = localStorage.getItem("token");
+
       
  export async function registerService(formData) {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(`${baseUrl}/auth/register`, {
       method: "POST",
@@ -21,6 +22,7 @@ const token = localStorage.getItem("token");
   }
 }
  export async function loginUser(formData) {
+  const token = localStorage.getItem("token");
   try {
     const res = await fetch(`${baseUrl}/auth/login`, {
       method: "POST",
@@ -46,6 +48,7 @@ const token = localStorage.getItem("token");
 
 // check login user
 export async function getAuthenticatedUser() {
+  
   try {
   const token = localStorage.getItem("token");
 
@@ -76,6 +79,7 @@ export async function getAuthenticatedUser() {
 }
 
 export async function getAuthenticatedAdmin() {
+  
   try {
   const token = localStorage.getItem("token");
 

@@ -34,10 +34,11 @@ export default function Navbar({ fixed }) {
   const [isVendorsOpen, setIsVendorsOpen] = useState(false)
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const token = localStorage.getItem("token");
+ 
 
 
   useEffect(() => {
+     const token = localStorage.getItem("token");
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }

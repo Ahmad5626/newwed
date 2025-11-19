@@ -1,8 +1,9 @@
 "use client";
 
 import { baseUrl } from "@/app/utils/Constant";
-const token = localStorage.getItem("token");
+
 export  const createCampaign = async (formData) => {
+  const token = localStorage.getItem("token");
     try {
         const data = await fetch(`${baseUrl}/v1/api/create-campaign`, {
             method: "POST",
@@ -20,6 +21,7 @@ export  const createCampaign = async (formData) => {
 };
 
  export const getSingleCampaign=async()=>{
+  const token = localStorage.getItem("token");
     const res=await fetch(`${baseUrl}/v1/api/get-login-user-campaigns`,{
       method:"GET",
       headers: {
