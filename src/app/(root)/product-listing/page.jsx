@@ -1,86 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Star, MapPin, Filter, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import Footer from "@/components/Footer"
-import Navbar from "@/components/Hedaer"
+import { useState, useMemo, useContext } from "react";
+import { Star, MapPin, Filter, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Hedaer";
+import { AuthContext } from "@/app/context/page";
+import Link from "next/link";
 
-// Sample business data
-const businesses = [
-  {
-    id: 1,
-    title: "Saddle & Sip Saloon",
-    category: "salon1",
-    categoryColor: "bg-primary",
-    owner: {
-      name: "superbusiness47",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image:
-      "https://image.wedmegood.com/resized/450X/uploads/images/93d9aa860dcf4d0dacfeda4b17f64b1frealwedding/PTN_RUHI+KARTIK_DAY02-5452-3.jpg?crop=224,349,1626,914",
-    rating: 4.5,
-    reviewCount: 2,
-    location: "Melbourne, Victoria, Australia",
-    priceRange: "$40 - $999",
-    isFavorited: false,
-  },
-
-  {
-    id: 2,
-    title: "Another Saloon",
-    category: "salon2",
-    categoryColor: "bg-blue-500",
-    owner: {
-      name: "anotherbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/76286e68431a4c929007f48f19e380bbrealwedding/SRI01051.jpg?crop=285,1154,1630,917",
-    rating: 4.0,
-    reviewCount: 5,
-    location: "Sydney, New South Wales, Australia",
-    priceRange: "$50 - $1500",
-    isFavorited: false,
-  },
-  {
-    id: 3,
-    title: "Third Saloon",
-    category: "salon3",
-    categoryColor: "bg-green-500",
-    owner: {
-      name: "thirdbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/46f88aa94224455fbc3940697615a453realwedding/NT6_5075-EditLarge.jpeg?crop=145,253,1013,569",
-    rating: 3.8,
-    reviewCount: 8,
-    location: "Brisbane, Queensland, Australia",
-    priceRange: "$60 - $1200",
-    isFavorited: false,
-  },
-  {
-    id: 4,
-    title: "Fourth Saloon",
-    category: "salon4",
-    categoryColor: "bg-purple-500",
-    owner: {
-      name: "fourthbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/4bfb1109e25948b89a7c0fb3fd93adfdrealwedding/ABHI5060Large.jpeg?crop=140,218,1013,569",
-    rating: 4.2,
-    reviewCount: 10,
-    location: "Adelaide, South Australia, Australia",
-    priceRange: "$70 - $1300",
-    isFavorited: false,
-  },
-]
-const categories = ["All", "Bars", "Restaurants", "Hotels", "Fitness", "Beauty", "Technology", "Food", "Automotive"]
-const countries = ["All Countries", "USA", "Canada", "UK", "Australia"]
+const categories = ["All", "Bars", "Restaurants", "Hotels", "Fitness", "Beauty", "Technology", "Food", "Automotive"];
 const cities = [
   "All Cities",
   "New York",
@@ -95,108 +27,106 @@ const cities = [
   "Phoenix",
   "Portland",
   "Austin",
-]
-const amenities = ["Free Wifi", "Parking", "Air Conditioning", "Swimming Pool", "Pet Friendly"]
+];
+const amenities = ["Free Wifi", "Parking", "Air Conditioning", "Swimming Pool", "Pet Friendly"];
 
 export default function BusinessDirectory() {
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [selectedCountry, setSelectedCountry] = useState("All Countries")
-  const [selectedCity, setSelectedCity] = useState("All Cities")
-  const [selectedAmenities, setSelectedAmenities] = useState([])
-  const [priceRange, setPriceRange] = useState([0, 1000])
-  const [minRating, setMinRating] = useState(0)
-  const [openOnly, setOpenOnly] = useState(false)
-  const [sortBy, setSortBy] = useState("rating")
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  const { campaignData } = useContext(AuthContext);
+
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 100000]); // INR
+  const [minRating, setMinRating] = useState(0);
+  const [openOnly, setOpenOnly] = useState(false);
+  const [sortBy, setSortBy] = useState("rating");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  const getCityFromAddress = (addr) => {
+    if (!addr) return "";
+    const parts = addr.split(",").map((s) => s.trim());
+    if (parts.length >= 2) return parts[parts.length - 2];
+    return parts[0] || "";
+  };
+  const getCountryFromAddress = (addr) => {
+    if (!addr) return "";
+    const parts = addr.split(",").map((s) => s.trim());
+    return parts[parts.length - 1] || "";
+  };
+
+  const normalized = useMemo(() => {
+    if (!Array.isArray(campaignData)) return [];
+    return campaignData.map((c) => {
+      const city = getCityFromAddress(c.address);
+      const country = getCountryFromAddress(c.address);
+      return {
+        id: c._id || c.id,
+        title: c.title || "Untitled",
+        category: c.category || "General",
+        image: Array.isArray(c.image) && c.image.length ? c.image[0] : "",
+        rating: Number(c.rating ?? 0),
+        reviews: Number(c.reviews ?? 0),
+        location: city,
+        country,
+        priceRange: [Number(c.price ?? 0), Number(c.price ?? 0)],
+        isOpen: c.isOpen ?? true,
+        amenities: Array.isArray(c.amenities) ? c.amenities : [],
+        description: c.description || "",
+        raw: c,
+      };
+    });
+  }, [campaignData]);
 
   const filteredBusinesses = useMemo(() => {
-    const filtered = businesses.filter((business) => {
-      // Category filter
-      if (selectedCategory !== "All" && business.category !== selectedCategory) {
-        return false
+    const filtered = normalized.filter((b) => {
+      if (selectedCategory !== "All" && b.category !== selectedCategory) return false;
+      if (selectedCity !== "All Cities" && !(b.location || "").toLowerCase().includes(selectedCity.toLowerCase()))
+        return false;
+      if (b.priceRange[0] > priceRange[1] || b.priceRange[1] < priceRange[0]) return false;
+      if ((b.rating || 0) < minRating) return false;
+      if (openOnly && !b.isOpen) return false;
+      if (selectedAmenities.length > 0 && b.amenities?.length) {
+        const hasAll = selectedAmenities.every((a) => b.amenities.includes(a));
+        if (!hasAll) return false;
       }
+      return true;
+    });
 
-      // Country filter
-      if (selectedCountry !== "All Countries" && business.country !== selectedCountry) {
-        return false
-      }
-
-      // City filter
-      if (selectedCity !== "All Cities" && business.location !== selectedCity) {
-        return false
-      }
-
-      // Price range filter
-      if (business.priceRange[0] > priceRange[1] || business.priceRange[1] < priceRange[0]) {
-        return false
-      }
-
-      // Rating filter
-      if (business.rating < minRating) {
-        return false
-      }
-
-      // Open only filter
-      if (openOnly && !business.isOpen) {
-        return false
-      }
-
-      // Amenities filter
-      if (selectedAmenities.length > 0) {
-        const hasAllAmenities = selectedAmenities.every((amenity) => business.amenities.includes(amenity))
-        if (!hasAllAmenities) {
-          return false
-        }
-      }
-
-      return true
-    })
-
-    // Sort businesses
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "rating":
-          return b.rating - a.rating
+          return (b.rating || 0) - (a.rating || 0);
         case "price-low":
-          return a.priceRange[0] - b.priceRange[0]
+          return a.priceRange[0] - b.priceRange[0];
         case "price-high":
-          return b.priceRange[1] - a.priceRange[1]
+          return b.priceRange[1] - a.priceRange[1];
         case "reviews":
-          return b.reviews - a.reviews
+          return (b.reviews || 0) - (a.reviews || 0);
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    return filtered
-  }, [selectedCategory, selectedCountry, selectedCity, selectedAmenities, priceRange, minRating, openOnly, sortBy])
+    return filtered;
+  }, [normalized, selectedCategory, selectedCity, selectedAmenities, priceRange, minRating, openOnly, sortBy]);
 
   const handleAmenityChange = (amenity, checked) => {
-    if (checked) {
-      setSelectedAmenities([...selectedAmenities, amenity])
-    } else {
-      setSelectedAmenities(selectedAmenities.filter((a) => a !== amenity))
-    }
-  }
+    setSelectedAmenities((prev) => (checked ? [...prev, amenity] : prev.filter((a) => a !== amenity)));
+  };
 
   const clearAllFilters = () => {
-    setSelectedCategory("All")
-    setSelectedCountry("All Countries")
-    setSelectedCity("All Cities")
-    setSelectedAmenities([])
-    setPriceRange([0, 1000])
-    setMinRating(0)
-    setOpenOnly(false)
-  }
+    setSelectedCategory("All");
+    setSelectedCity("All Cities");
+    setSelectedAmenities([]);
+    setPriceRange([0, 100000]);
+    setMinRating(0);
+    setOpenOnly(false);
+  };
 
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-      />
-    ))
-  }
+  const renderStars = (rating) =>
+    Array.from({ length: 5 }, (_, i) => (
+      <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+    ));
 
   const FilterSidebar = () => (
     <div className="w-full lg:w-66 bg-white border-r border-gray-200 p-6 space-y-6">
@@ -216,9 +146,7 @@ export default function BusinessDirectory() {
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                selectedCategory === category
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "text-gray-600 hover:bg-gray-50"
+                selectedCategory === category ? "bg-blue-50 text-blue-700 border border-blue-200" : "text-gray-600 hover:bg-gray-50"
               }`}
             >
               {category}
@@ -227,51 +155,31 @@ export default function BusinessDirectory() {
         </div>
       </div>
 
-      {/* Location Filters */}
+      {/* City */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">Location</h3>
-        <div className="space-y-3">
-          {/* <div>
-            <label className="block text-sm text-gray-600 mb-1">Country</label>
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">City</label>
-            <Select value={selectedCity} onValueChange={setSelectedCity}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city} value={city}>
-                    {city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <h3 className="font-medium text-gray-900 mb-3">City</h3>
+        <div>
+          <Select value={selectedCity} onValueChange={setSelectedCity}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((city) => (
+                <SelectItem key={city} value={city}>
+                  {city}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Open Location */}
-      <div>
-        <div className="flex items-center space-x-2">
-          <Checkbox id="open-only" checked={openOnly} onCheckedChange={setOpenOnly} />
-          <label htmlFor="open-only" className="text-sm text-gray-600">
-            Open Location
-          </label>
-        </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox id="open-only" checked={openOnly} onCheckedChange={(c) => setOpenOnly(Boolean(c))} />
+        <label htmlFor="open-only" className="text-sm text-gray-600">
+          Open Location
+        </label>
       </div>
 
       {/* Amenities */}
@@ -283,7 +191,7 @@ export default function BusinessDirectory() {
               <Checkbox
                 id={amenity}
                 checked={selectedAmenities.includes(amenity)}
-                onCheckedChange={(checked) => handleAmenityChange(amenity, checked)}
+                onCheckedChange={(checked) => handleAmenityChange(amenity, Boolean(checked))}
               />
               <label htmlFor={amenity} className="text-sm text-gray-600">
                 {amenity}
@@ -293,19 +201,19 @@ export default function BusinessDirectory() {
         </div>
       </div>
 
-      {/* Price Filter */}
+      {/* Price Filter (INR) */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">Pricing Filter</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Pricing Filter (₹)</h3>
         <div className="space-y-3">
           <div className="flex justify-between text-sm text-gray-600">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span>₹{priceRange[0]}</span>
+            <span>₹{priceRange[1]}</span>
           </div>
-          <Slider value={priceRange} onValueChange={setPriceRange} max={1000} min={0} step={10} className="w-full" />
+          <Slider value={priceRange} onValueChange={(v) => setPriceRange(v)} max={100000} min={0} step={500} className="w-full" />
         </div>
       </div>
 
-      {/* Rating Filter */}
+      {/* Rating */}
       <div>
         <h3 className="font-medium text-gray-900 mb-3">Rating</h3>
         <div className="space-y-2">
@@ -324,139 +232,121 @@ export default function BusinessDirectory() {
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
-   <>
-   <Navbar fixed={true} />
-     <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto my-4">
-      {/* Mobile Filter Overlay */}
-      {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileFilterOpen(false)} />
-          <div className="fixed left-0 top-0 h-full w-80 bg-white overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              <Button variant="ghost" size="sm" onClick={() => setIsMobileFilterOpen(false)}>
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="p-4">
-              <FilterSidebar />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block">
-          <FilterSidebar />
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-4 lg:p-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => setIsMobileFilterOpen(true)} className="lg:hidden">
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-              <h1 className="text-2xl font-bold text-gray-900">Business Directory</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">{filteredBusinesses.length} results</span>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="reviews">Most Reviews</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Business Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredBusinesses.map((business) => (
-              <Card key={business.id} className="overflow-hidden hover:shadow-lg transition-shadow !py-0">
-                <div className="relative">
-                  <img
-                    src={business.image || "/placeholder.svg"}
-                    alt={business.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top- right-3">
-                    {/* <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        business.isOpen ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {business.isOpen ? "Open" : "Closed"}
-                    </span> */}
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg leading-tight">{business.title}</h3>
-                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{business.category}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex">{renderStars(business.rating)}</div>
-                    <span className="text-sm text-gray-600">
-                      {business.rating} ({business.reviews} reviews)
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1 mb-3">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">
-                      {business.location}, {business.country}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-lg text-gray-900">
-                      ${business.priceRange[0]} - ${business.priceRange[1]}
-                    </span>
-                    <Button size="sm">View Details</Button>
-                  </div>
-
-                  {/* <div className="flex flex-wrap gap-1 mt-3">
-                    {business.amenities.slice(0, 3).map((amenity) => (
-                      <span key={amenity} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                        {amenity}
-                      </span>
-                    ))}
-                    {business.amenities.length > 3 && (
-                      <span className="text-xs text-gray-500">+{business.amenities.length - 3} more</span>
-                    )}
-                  </div> */}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredBusinesses.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Filter className="w-12 h-12 mx-auto" />
+    <>
+      <Navbar fixed={true} />
+      <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto my-4">
+        {/* Mobile Filter Overlay */}
+        {isMobileFilterOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileFilterOpen(false)} />
+            <div className="fixed left-0 top-0 h-full w-80 bg-white overflow-y-auto">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="text-lg font-semibold">Filters</h2>
+                <Button variant="ghost" size="sm" onClick={() => setIsMobileFilterOpen(false)}>
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your filters to see more results</p>
-              <Button onClick={clearAllFilters}>Clear All Filters</Button>
+              <div className="p-4">
+                <FilterSidebar />
+              </div>
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="flex">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block">
+            <FilterSidebar />
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 p-4 lg:p-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+              <div className="flex items-center gap-4">
+                <Button variant="outline" size="sm" onClick={() => setIsMobileFilterOpen(true)} className="lg:hidden">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                </Button>
+                <h1 className="text-2xl font-bold text-gray-900">Business Directory</h1>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">{filteredBusinesses.length} results</span>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="reviews">Most Reviews</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredBusinesses.map((b) => (
+                <Card key={b.id} className="overflow-hidden hover:shadow-lg transition-shadow !py-0">
+                  <div className="relative">
+                    <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full h-48 object-cover" />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 text-lg leading-tight">{b.title}</h3>
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{b.category}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex">{renderStars(b.rating)}</div>
+                      <span className="text-sm text-gray-600">
+                        {b.rating} ({b.reviews} reviews)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 mb-3">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        {b.location}
+                        {b.country ? `, ${b.country}` : ""}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-lg text-gray-900">
+                        ₹{b.priceRange[0].toLocaleString()}
+                        {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
+                      </span>
+                      <Button size="sm">
+                      <Link href={`/product-details/${b.id}`}>
+                      View Details
+                      </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {filteredBusinesses.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Filter className="w-12 h-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
+                <p className="text-gray-600 mb-4">Try adjusting your filters to see more results</p>
+                <Button onClick={clearAllFilters}>Clear All Filters</Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-    <Footer/>
-   </>
-  )
+      <Footer />
+    </>
+  );
 }

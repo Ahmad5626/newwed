@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import {
   ChevronDown,
   Menu,
@@ -23,12 +23,18 @@ import {
   Building,
 } from "lucide-react"
 import Link from "next/link"
+import { AuthContext } from "@/app/context/page"
+import { Router } from "next/router"
 
-export default function Navbar({fixed}) {
+export default function Navbar({ fixed }) {
+  const {authenticatedUser} = useContext(AuthContext)
+ 
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVendorsOpen, setIsVendorsOpen] = useState(false)
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const token = localStorage.getItem("token");
 
 
   useEffect(() => {
@@ -38,6 +44,11 @@ export default function Navbar({fixed}) {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+  const handleLogout=()=>{
+    localStorage.removeItem("token");
+    window.location.reload();
+    Router.push("/login");
+  }
 
   const vendorCategories = [
     {
@@ -216,9 +227,9 @@ export default function Navbar({fixed}) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <div className="bg-white px-4 py-2 rounded">
+            <Link href="/" className="bg-white px-4 py-2 rounded">
               <span className="text-pink-500 text-xl font-bold italic">wedding planet</span>
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -292,7 +303,7 @@ export default function Navbar({fixed}) {
                   }`}
               >
                 About
-             
+
               </Link>
               <Link
                 href="/blog"
@@ -324,34 +335,45 @@ export default function Navbar({fixed}) {
             <div className="relative">
               <button
                 onClick={() => setIsCustomerOpen(!isCustomerOpen)}
-                className={`border px-3 py-1 rounded text-sm flex items-center transition-colors ${isScrolled
-                    ? "border-primary text-primary hover:bg-coral-50"
-                    : "border-primary text-primary"
-                  }`}
+                className="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded text-sm flex items-center"
               >
                 Customer
                 <ChevronDown className="ml-1 h-4 w-4" />
               </button>
               {isCustomerOpen && (
                 <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-2 z-50">
-                  <Link href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
-                    Login
-                  </Link>
-                  <Link href="/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
-                    Sign Up
-                  </Link>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
-                    My Account
-                  </a>
+
+                  {token ? (
+                    <div>
+                      <Link href={authenticatedUser.registeredType === "vendor" ? "/vendor-dashboard" : "/user-dashboard"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
+                        My Account
+                      </Link>
+                      <Link href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600" onClick={handleLogout}>
+                        Logout
+                      </Link>
+                    </div>
+                  )
+                    : <>
+                      <Link href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
+                        Login
+                      </Link>
+                      <Link href="/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
+                        Sign Up
+                      </Link>
+                    </>}
+
+
+
+              
                 </div>
               )}
             </div>
 
             {/* Vendor Button */}
-            <button className="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded text-sm flex items-center">
+            {/* <button className="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded text-sm flex items-center">
               Vendor
               <ChevronDown className="ml-1 h-4 w-4" />
-            </button>
+            </button> */}
           </div>
 
           {/* Mobile menu button */}
@@ -419,7 +441,7 @@ export default function Navbar({fixed}) {
                 )}
               </div>
 
-              <Link  href="/about" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/about" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 About
               </Link>
               <Link href="/blog" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
@@ -432,8 +454,8 @@ export default function Navbar({fixed}) {
                 <button
                   onClick={() => setIsCustomerOpen(!isCustomerOpen)}
                   className={`border px-3 py-1 rounded text-sm flex items-center transition-colors ${isScrolled
-                      ? "border-primary text-primary hover:bg-coral-50"
-                      : "border-primary text-primary"
+                    ? "border-primary text-primary hover:bg-coral-50"
+                    : "border-primary text-primary"
                     }`}
                 >
                   Customer

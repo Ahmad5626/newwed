@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +8,9 @@ import { Avatar } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { MoreHorizontal, Search, Filter, Plus, Eye, Edit, Trash2, Ban, CheckCircle } from "lucide-react"
-
+import { AuthContext } from "@/app/context/page"
+import { deleteUser } from "@/app/services/authApi"
+import { toast, Toaster } from "sonner";
 const users = [
   {
     id: 1,
@@ -73,6 +75,8 @@ const users = [
 ]
 
 const getStatusBadge = (status) => {
+  
+  
   switch (status) {
     case "active":
       return (
@@ -129,6 +133,8 @@ const getRoleBadge = (role) => {
 }
 
 export function UsersTable() {
+  const {allUsers,getUserData}=useContext(AuthContext)
+  console.log(allUsers);
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUsers, setSelectedUsers] = useState([])
 
@@ -138,9 +144,16 @@ export function UsersTable() {
       user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
+  const handleDeleteUser =async (userId) => {
+    const data =await deleteUser(userId)
+    if(data.success){
+      toast("User deleted successfully");
+      getUserData()}
+  }
   return (
     <Card className="p-6">
       {/* Header */}
+      <Toaster position="top-center"/>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Users</h2>
@@ -156,10 +169,10 @@ export function UsersTable() {
             className="pl-10"
           />
         </div>
-        <Button variant="outline" size="sm">
+        {/* <Button variant="outline" size="sm">
           <Filter className="h-4 w-4 mr-2" />
           Filter
-        </Button>
+        </Button> */}
       </div>
         {/* <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
@@ -182,15 +195,15 @@ export function UsersTable() {
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">Number</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">Role</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground">Join Date</th>
+              {/* <th className="text-left py-3 px-4 font-medium text-muted-foreground">Join Date</th>
             
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">Bookings</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">Actions</th> */}
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="border-b border-border hover:bg-muted/50">
+            {allUsers?.map((user ,i)  => (
+              <tr key={i} className="border-b border-border hover:bg-muted/50">
                 <td className="py-3 px-4">
                   <input type="checkbox" className="rounded" />
                 </td>
@@ -202,18 +215,18 @@ export function UsersTable() {
                       </div>
                     </Avatar> */}
                     <div>
-                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="font-medium text-foreground">{user.fullName}</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
                 </td>
-                <td className="py-3 px-4 text-sm text-muted-foreground">{user.number}</td>
-                <td className="py-3 px-4">{getRoleBadge(user.role)}</td>
+                <td className="py-3 px-4 text-sm text-muted-foreground">{user.phone}</td>
+                <td className="py-3 px-4">{getRoleBadge(user.registeredType)}</td>
                 
-                <td className="py-3 px-4">{getStatusBadge(user.status)}</td>
+                {/* <td className="py-3 px-4">{getStatusBadge(user.status)}</td>
                 <td className="py-3 px-4 text-sm text-muted-foreground">{user.joinDate}</td>
                
-                <td className="py-3 px-4 text-sm text-foreground">{user.bookings}</td>
+                <td className="py-3 px-4 text-sm text-foreground">{user.bookings}</td> */}
                 <td className="py-3 px-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -226,10 +239,10 @@ export function UsersTable() {
                         <Eye className="mr-2 h-4 w-4" />
                         View Details
                       </DropdownMenuItem> */}
-                      <DropdownMenuItem>
+                      {/* <DropdownMenuItem>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit User
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       {/* {user.status === "active" ? (
                         <DropdownMenuItem>
                           <Ban className="mr-2 h-4 w-4" />
@@ -241,7 +254,7 @@ export function UsersTable() {
                           Activate User
                         </DropdownMenuItem>
                       )} */}
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(user._id)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete User
                       </DropdownMenuItem>

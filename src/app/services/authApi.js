@@ -1,5 +1,8 @@
+
+"use client"
 import { baseUrl } from "@/app/utils/Constant";
-      //  const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
+      
  export async function registerService(formData) {
   try {
     const res = await fetch(`${baseUrl}/auth/register`, {
@@ -44,7 +47,7 @@ import { baseUrl } from "@/app/utils/Constant";
 // check login user
 export async function getAuthenticatedUser() {
   try {
- 
+  const token = localStorage.getItem("token");
 
     if (!token) {
       console.warn("No token found in localStorage");
@@ -71,6 +74,37 @@ export async function getAuthenticatedUser() {
     return null;
   }
 }
+
+export async function getAuthenticatedAdmin() {
+  try {
+  const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.warn("No token found in localStorage");
+      return null;
+    }
+
+    const res = await fetch(`${baseUrl}/auth/admin/dashboard`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ Send token in Authorization header
+      },
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      // console.log("Authenticated user:", data.data);
+      return data.data // return user data
+    } else {
+      console.warn("Authentication failed");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error checking auth:", error);
+    return null;
+  }
+}
+
 
 
 export async function updateUser(formData){
@@ -109,4 +143,24 @@ export  async function getData(){
            console.log(err)
          }
         }
+
+        export async function deleteUser(id){
+          try{
+            const response=await fetch(`${baseUrl}/auth/delete-user/${id}`,{method:"DELETE"})
+            const data=await response.json()
+            return data
+          }catch(err){
+            console.log(err)
+          }
+        }
         
+
+        export async function logoutUser(){
+          try{
+            const response=await fetch(`${baseUrl}/auth/logout`,{method:"GET"})
+            const data=await response.json()
+            return data
+          }catch(err){
+            console.log(err)
+          }
+        }

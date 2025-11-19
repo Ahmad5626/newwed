@@ -10,16 +10,11 @@ import Link from "next/link"
 import { AuthContext } from "@/app/context/page"
 
 export default function LoginPage() {
-  const {loginFormData,setLoginFormData,loginHandleSubmit,Toaster} = useContext(AuthContext)
+  const {loginFormData,setLoginFormData,loginHandleSubmit,Toaster,handleInputChange} = useContext(AuthContext)
   const [activeTab, setActiveTab] = useState("user")
  
 
-  const handleInputChange = (e) => {
-    setLoginFormData({
-      ...loginFormData,
-      [e.target.name]: e.target.value,
-    })
-  }
+ 
 
   // const handleLogin = (e) => {
   //   e.preventDefault()

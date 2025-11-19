@@ -39,8 +39,8 @@ const sidebarItems = [
     icon: BarChart3,
   },
   {
-    title: "Messages",
-    href: "/admin/messages",
+    title: "categories",
+    href: "/admin/categories",
     icon: MessageSquare,
   },
   {

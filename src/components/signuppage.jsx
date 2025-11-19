@@ -24,8 +24,9 @@ const vendorTypes = [
 ]
 
 export default function SignupPage() {
-  const {userType,setUserType,formData,setFormData,registerHandleSubmit,Toaster}=useContext(AuthContext)
+  const {userType,setUserType,formData,setFormData,registerHandleSubmit,Toaster,categories,authenticatedUser}=useContext(AuthContext)
   
+
 
   
   // ✅ Whenever userType changes, update registeredType
@@ -220,9 +221,9 @@ export default function SignupPage() {
                           <SelectValue placeholder="Select your vendor type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {vendorTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
+                          {categories.map((type,i) => (
+                            <SelectItem key={i} value={type.name}>
+                              {type.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
