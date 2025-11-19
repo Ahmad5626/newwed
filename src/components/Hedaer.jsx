@@ -27,9 +27,9 @@ import { AuthContext } from "@/app/context/page"
 import { Router } from "next/router"
 
 export default function Navbar({ fixed }) {
-  const {authenticatedUser} = useContext(AuthContext)
- 
-  
+  const { authenticatedUser } = useContext(AuthContext)
+
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVendorsOpen, setIsVendorsOpen] = useState(false)
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
@@ -44,7 +44,7 @@ export default function Navbar({ fixed }) {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-  const handleLogout=()=>{
+  const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.reload();
     Router.push("/login");
@@ -240,15 +240,10 @@ export default function Navbar({ fixed }) {
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
-                Home
+                Venues
+
               </Link>
-              <Link
-                href="/product-listing"
-                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
-                  }`}
-              >
-                Listings
-              </Link>
+
               {/* <a
                 href="#"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
@@ -296,16 +291,34 @@ export default function Navbar({ fixed }) {
                   </div>
                 )}
               </div>
-
               <Link
-                href="/about"
+                href="/"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
-                About
+                Gallery
+
 
               </Link>
-              <Link
+
+               <Link
+                href="/"
+                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
+                  }`}
+              >
+              E-invites
+
+              </Link>
+               <Link
+                href="/"
+                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
+                  }`}
+              >
+              Planner
+
+              </Link>
+
+               <Link
                 href="/blog"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
@@ -313,6 +326,26 @@ export default function Navbar({ fixed }) {
                 Blog
                 {/* <span className="ml-1 text-lg">+</span> */}
               </Link>
+              <Link
+                href="/about"
+                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
+                  }`}
+              >
+                Our Story
+
+              </Link>
+              <Link
+                href="/"
+                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
+                  }`}
+              >
+                Mojo
+
+
+              </Link>
+
+
+             
               <Link
                 href="/contact"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
@@ -364,7 +397,7 @@ export default function Navbar({ fixed }) {
 
 
 
-              
+
                 </div>
               )}
             </div>
@@ -392,16 +425,10 @@ export default function Navbar({ fixed }) {
           <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg rounded-b-lg">
               <Link href="/" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
-                Home
-              </Link>
-              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
-                Listings
-              </Link>
-              {/* <a href="#" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
-                Pricing
-              </a> */}
+                Venues
 
-              {/* Mobile Vendors Section */}
+              </Link>
+               {/* Mobile Vendors Section */}
               <div className="space-y-2">
                 <button
                   onClick={() => setIsVendorsOpen(!isVendorsOpen)}
@@ -440,12 +467,32 @@ export default function Navbar({ fixed }) {
                   </div>
                 )}
               </div>
+              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+                Gallery
+              </Link>
+              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+                E-invites
+
+              </Link>
+              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+                Planner
+
+              </Link>
+            
+            
+             
+
+             
 
               <Link href="/about" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
-                About
+                Our Story
               </Link>
               <Link href="/blog" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Blog
+              </Link>
+                <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+                Mojo
+
               </Link>
               <Link href="/contact" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Contact
