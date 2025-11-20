@@ -34,12 +34,13 @@ export default function Navbar({ fixed }) {
   const [isVendorsOpen, setIsVendorsOpen] = useState(false)
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
- 
- const token = localStorage.getItem("token");
+ const [fix,setFix]=useState(false)
 
 
   useEffect(() => {
-        const handleScroll = () => {
+  
+
+    const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
     window.addEventListener("scroll", handleScroll)
@@ -218,7 +219,12 @@ export default function Navbar({ fixed }) {
       ],
     },
   ]
-
+useEffect(()=>{
+     const token = localStorage.getItem("token");
+    if(token){
+      setFix(token);
+    }
+},[])
   return (
     <nav
       className={`w-full z-50 ${!fixed ? "fixed  text-white" : "bg-white shadow-lg text-gray-900"} top-0 transition-all duration-300 ${isScrolled ? "bg-white shadow-lg text-gray-900" : "bg-transparent"
@@ -377,7 +383,7 @@ export default function Navbar({ fixed }) {
               {isCustomerOpen && (
                 <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-2 z-50">
 
-                  {token ? (
+                  {fix ? (
                     <div>
                       <Link href={authenticatedUser.registeredType === "vendor" ? "/vendor-dashboard" : "/user-dashboard"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-coral-50 hover:text-coral-600">
                         My Account
