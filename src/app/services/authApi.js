@@ -4,7 +4,7 @@ import { baseUrl } from "@/app/utils/Constant";
 
       
  export async function registerService(formData) {
-  const token = localStorage.getItem("token");
+
   try {
     const res = await fetch(`${baseUrl}/auth/register`, {
       method: "POST",
