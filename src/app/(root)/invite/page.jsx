@@ -2,10 +2,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { INVITE_TEMPLATES } from "@/app/utils/invite-templates";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Hedaer";
 
 export default function InviteGallery() {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-10">
+  <>
+  <Navbar fixed={true} />
+      <section className="max-w-7xl mx-auto px-6 py-10">
       <h2 className="text-3xl font-bold mb-6">Wedding Cards</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -29,5 +33,7 @@ export default function InviteGallery() {
         ))}
       </div>
     </section>
+    <Footer/>
+  </>
   );
 }
