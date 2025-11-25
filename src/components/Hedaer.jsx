@@ -296,7 +296,7 @@ export default function Navbar({ fixed }) {
               </Link>
 
               <Link
-                href="/nvite"
+                href="/invite"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
