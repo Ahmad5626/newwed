@@ -293,8 +293,8 @@ export default function BusinessDirectory() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredBusinesses.map((b) => (
                 <Card key={b.id} className="overflow-hidden hover:shadow-lg transition-shadow !py-0">
-                  <div className="relative">
-                    <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full h-48 object-cover" />
+                  <div className="relative h-48 overflow-hidden">
+                    <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full " />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">

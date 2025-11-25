@@ -27,18 +27,18 @@ import { AuthContext } from "@/app/context/page"
 import { Router } from "next/router"
 
 export default function Navbar({ fixed }) {
-  const { authenticatedUser } = useContext(AuthContext)
+  const { authenticatedUser ,categories} = useContext(AuthContext)
 
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isVendorsOpen, setIsVendorsOpen] = useState(false)
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
- const [fix,setFix]=useState(false)
+  const [fix, setFix] = useState(false)
 
 
   useEffect(() => {
-  
+
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
@@ -219,12 +219,12 @@ export default function Navbar({ fixed }) {
       ],
     },
   ]
-useEffect(()=>{
-     const token = localStorage.getItem("token");
-    if(token){
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
       setFix(token);
     }
-},[])
+  }, [])
   return (
     <nav
       className={`w-full z-50 ${!fixed ? "fixed  text-white" : "bg-white shadow-lg text-gray-900"} top-0 transition-all duration-300 ${isScrolled ? "bg-white shadow-lg text-gray-900" : "bg-transparent"
@@ -243,7 +243,7 @@ useEffect(()=>{
           <div className="hidden lg:block">
             <div className="ml-10 flex items-baseline space-x-8">
               <Link
-                href="/"
+                href="/product-listing"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
@@ -251,13 +251,7 @@ useEffect(()=>{
 
               </Link>
 
-              {/* <a
-                href="#"
-                className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
-                  }`}
-              >
-                Pricing
-              </a> */}
+            
 
               {/* Vendors Dropdown */}
               <div className="relative">
@@ -270,27 +264,20 @@ useEffect(()=>{
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </button>
                 {isVendorsOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-screen max-w-6xl bg-white rounded-md shadow-xl py-6 z-50 -ml-96 h-screen overflow-auto">
+                  <div className="absolute top-10 left-0 mt-1 w-screen max-w-6xl bg-white rounded-md shadow-xl py-6 z-50 -ml-96  overflow-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 px-6">
-                      {vendorCategories.map((category, index) => {
-                        const IconComponent = category.icon
+                      {categories.map((category, index) => {
+                        
                         return (
                           <div key={index} className="space-y-3">
-                            <div className="flex items-center space-x-2 text-coral-500 font-semibold ">
-                              <IconComponent className="h-5 w-5 text-primary" />
-                              <span className="text-[10px] text-primary">{category.title}</span>
-                            </div>
-                            <div className="space-y-1">
-                              {category.items.map((item, itemIndex) => (
-                                <a
-                                  key={itemIndex}
-                                  href="#"
-                                  className="block px-2 py-1 text-[10px] text-gray-700 hover:bg-coral-50 hover:text-coral-600 rounded transition-colors"
+                               <a
+                                  key={index}
+                                  href={`/product-listing?category=${category.slug}`}
+                                  className="text-sm font-medium text-gray-800 group-hover:text-coral-500 transition-colors duration-200"
                                 >
-                                  {item}
+                                  {category.name}
                                 </a>
-                              ))}
-                            </div>
+                          
                           </div>
                         )
                       })}
@@ -299,7 +286,7 @@ useEffect(()=>{
                 )}
               </div>
               <Link
-                href="/"
+                href="/gallery"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
@@ -308,24 +295,24 @@ useEffect(()=>{
 
               </Link>
 
-               <Link
+              <Link
                 href="/"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
-              E-invites
+                E-invites
 
               </Link>
-               <Link
+              <Link
                 href="/"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
               >
-              Planner
+                Planner
 
               </Link>
 
-               <Link
+              <Link
                 href="/blog"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium flex items-center transition-colors ${isScrolled ? "text-gray-900" : ""
                   }`}
@@ -347,12 +334,8 @@ useEffect(()=>{
                   }`}
               >
                 Mojo
-
-
               </Link>
 
-
-             
               <Link
                 href="/contact"
                 className={`hover:text-coral-500 px-3 py-2 text-sm font-medium transition-colors ${isScrolled ? "text-gray-900" : ""
@@ -366,10 +349,7 @@ useEffect(()=>{
           {/* Right Side Items */}
           <div className="hidden md:flex items-center space-x-4">
 
-            {/* <div className={`flex items-center space-x-1 text-sm ${isScrolled ? "text-gray-900" : "text-white"}`}>
-              <Globe className="h-4 w-4" />
-              <span>English</span>
-            </div> */}
+
 
             {/* Customer Dropdown */}
             <div className="relative">
@@ -410,10 +390,7 @@ useEffect(()=>{
             </div>
 
             {/* Vendor Button */}
-            {/* <button className="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded text-sm flex items-center">
-              Vendor
-              <ChevronDown className="ml-1 h-4 w-4" />
-            </button> */}
+
           </div>
 
           {/* Mobile menu button */}
@@ -435,7 +412,7 @@ useEffect(()=>{
                 Venues
 
               </Link>
-               {/* Mobile Vendors Section */}
+              {/* Mobile Vendors Section */}
               <div className="space-y-2">
                 <button
                   onClick={() => setIsVendorsOpen(!isVendorsOpen)}
@@ -485,11 +462,11 @@ useEffect(()=>{
                 Planner
 
               </Link>
-            
-            
-             
 
-             
+
+
+
+
 
               <Link href="/about" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Our Story
@@ -497,7 +474,7 @@ useEffect(()=>{
               <Link href="/blog" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Blog
               </Link>
-                <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Mojo
 
               </Link>
