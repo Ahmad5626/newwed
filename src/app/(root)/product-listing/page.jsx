@@ -302,11 +302,11 @@ export default function BusinessDirectory() {
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
     <>
-    <Suspense fallback={<div>Loading...</div>}>
+   
       <Navbar fixed={true} />
       <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto my-4">
         {/* Mobile Filter Overlay */}
@@ -444,7 +444,7 @@ export default function BusinessDirectory() {
         </div>
       </div>
       <Footer />
-      </Suspense>
+      
     </>
   )
 }
