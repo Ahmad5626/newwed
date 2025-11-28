@@ -7,74 +7,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { AuthContext } from "@/app/context/page"
 import { Card, CardContent } from "@/components/ui/card"
-const listings = [
-  {
-    id: 1,
-    title: "Saddle & Sip Saloon",
-    category: "salon1",
-    categoryColor: "bg-primary",
-    owner: {
-      name: "superbusiness47",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image:
-      "https://image.wedmegood.com/resized/450X/uploads/images/93d9aa860dcf4d0dacfeda4b17f64b1frealwedding/PTN_RUHI+KARTIK_DAY02-5452-3.jpg?crop=224,349,1626,914",
-    rating: 4.5,
-    reviewCount: 2,
-    location: "Melbourne, Victoria, Australia",
-    priceRange: "$40 - $999",
-    isFavorited: false,
-  },
 
-  {
-    id: 2,
-    title: "Another Saloon",
-    category: "salon2",
-    categoryColor: "bg-blue-500",
-    owner: {
-      name: "anotherbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/76286e68431a4c929007f48f19e380bbrealwedding/SRI01051.jpg?crop=285,1154,1630,917",
-    rating: 4.0,
-    reviewCount: 5,
-    location: "Sydney, New South Wales, Australia",
-    priceRange: "$50 - $1500",
-    isFavorited: false,
-  },
-  {
-    id: 3,
-    title: "Third Saloon",
-    category: "salon3",
-    categoryColor: "bg-green-500",
-    owner: {
-      name: "thirdbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/46f88aa94224455fbc3940697615a453realwedding/NT6_5075-EditLarge.jpeg?crop=145,253,1013,569",
-    rating: 3.8,
-    reviewCount: 8,
-    location: "Brisbane, Queensland, Australia",
-    priceRange: "$60 - $1200",
-    isFavorited: false,
-  },
-  {
-    id: 4,
-    title: "Fourth Saloon",
-    category: "salon4",
-    categoryColor: "bg-purple-500",
-    owner: {
-      name: "fourthbusiness",
-      avatar: "https://i.pravatar.cc/300",
-    },
-    image: "https://image.wedmegood.com/resized/450X/uploads/images/4bfb1109e25948b89a7c0fb3fd93adfdrealwedding/ABHI5060Large.jpeg?crop=140,218,1013,569",
-    rating: 4.2,
-    reviewCount: 10,
-    location: "Adelaide, South Australia, Australia",
-    priceRange: "$70 - $1300",
-    isFavorited: false,
-  },
-]
 
 const StarRating = ({ rating, reviewCount }) => {
 
@@ -167,9 +100,9 @@ const ListingCard = ({ listing, index }) => {
             <span className="font-semibold text-lg text-gray-900">
               ₹{listing.price}
             </span>
-            <div size="sm">
-              <Link href={`/product-details/${listing._id}`}>View Details</Link>
-            </div>
+            <Button size="sm">
+              <div >View Details</div>
+            </Button>
           </div>
         </CardContent>
       </Link>
