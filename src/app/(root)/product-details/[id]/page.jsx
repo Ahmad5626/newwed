@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 
 import {
   Star,
@@ -9,617 +10,516 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Phone,
-  Mail,
-  Clock,
-  Users,
-  CheckCircle2,
-  Play,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-
-import Footer from "@/components/Footer"
-import { AuthContext } from "@/app/context/page"
-import { useParams } from "next/navigation"
-import { addCompaignMasseage } from "@/app/services/campaign"
-import { toast, Toaster } from "sonner"
-import { baseUrl } from "@/app/utils/Constant"
-import { useContext, useEffect, useState } from "react"
-import Navbar from "@/components/Hedaer"
-
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Navbar from "@/components/Hedaer";
+import Footer from "@/components/Footer";
+import { AuthContext } from "@/app/context/page";
+import { useParams } from "next/navigation";
+import { addCompaignMasseage } from "@/app/services/campaign";
+import { toast , Toaster} from "sonner";
+import { baseUrl } from "@/app/utils/Constant";
+import { useContext, useEffect, useState } from "react";
 export default function CampaignDetails() {
-  const { campaignData } = useContext(AuthContext)
-  const { id } = useParams()
+const { campaignData } = useContext(AuthContext);
+  const { id } = useParams();
   const [reviewForm, setReviewForm] = useState({
-    name: "",
-    email: "",
-    rating: 0,
-    comment: "",
-  })
-  const [reviews, setReviews] = useState([])
-  const [averageRating, setAverageRating] = useState(0)
-  const [totalReviews, setTotalReviews] = useState(0)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isLiked, setIsLiked] = useState(false)
-  const [activeTab, setActiveTab] = useState("images")
-  const [lightboxOpen, setLightboxOpen] = useState(false)
+  name: "",
+  email: "",
+  rating: 0,
+  comment: "",
+});
+const [reviews, setReviews] = useState([]);
+const [averageRating, setAverageRating] = useState(0);
+const [totalReviews, setTotalReviews] = useState(0);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [whatsappNotify, setWhatsappNotify] = useState(false);
+  const [activeTab, setActiveTab] = useState("images");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     mobile: "",
     city: "",
     message: "",
-  })
+  });
 
-  useEffect(() => {
-    fetchReviews()
-  }, [])
 
-  const fetchReviews = async () => {
-    try {
-      const res = await fetch(`${baseUrl}/v1/api/campaign/${id}/reviews`)
-      const data = await res.json()
-      if (data.success) {
-        setReviews(data.reviews)
-        setAverageRating(data.averageRating)
-        setTotalReviews(data.totalReviews)
-      }
-    } catch (error) {
-      // Silently fail - reviews will show empty state
+useEffect(() => {
+  fetchReviews();
+}, []);
+
+const fetchReviews = async () => {
+  try {
+    const res = await fetch(`${baseUrl}/v1/api/campaign/${id}/reviews`);
+    const data = await res.json();
+    if (data.success) {
+      setReviews(data.reviews);
+      setAverageRating(data.averageRating);
+      setTotalReviews(data.totalReviews);
     }
+  } catch (error) {
+    console.error(error);
   }
+};
 
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      const res = await fetch(`${baseUrl}/v1/api/campaign/${id}/review`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reviewForm),
-      })
-      const data = await res.json()
-      if (data.success) {
-        toast.success("Review added successfully!")
-        setReviewForm({ name: "", email: "", rating: 0, comment: "" })
-        fetchReviews()
-      } else {
-        toast.error(data.message)
-      }
-    } catch (error) {
-      toast.error("Error submitting review")
+const handleReviewSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await fetch(`${baseUrl}/v1/api/campaign/${id}/review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reviewForm),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("Review added successfully!");
+      setReviewForm({ name: "", email: "", rating: 0, comment: "" });
+      fetchReviews();
+    } else {
+      alert(data.message);
     }
+  } catch (error) {
+    console.error(error);
+    alert("Error submitting review");
   }
+};
 
-  const campaign = campaignData?.find((c) => c._id === id)
+// end review
 
+
+  
+
+  // Find the selected campaign by id
+  const campaign = campaignData?.find((c) => c._id === id);
+
+  // Fallback if not found
   if (!campaign) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto bg-muted rounded-full flex items-center justify-center">
-            <MessageCircle className="w-10 h-10 text-muted-foreground" />
-          </div>
-          <h2 className="text-2xl font-semibold text-foreground">Campaign not found</h2>
-          <p className="text-muted-foreground">Please go back and select a valid one.</p>
-          <Button variant="outline" onClick={() => window.history.back()}>
-            Go Back
-          </Button>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-xl font-semibold text-gray-700">
+          Campaign not found
+        </h2>
+        <p className="text-gray-500">Please go back and select a valid one.</p>
       </div>
-    )
+    );
   }
+
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const data = await addCompaignMasseage(id, formData)
-    if (data.success) {
-      toast.success(data.message)
-      setFormData({ name: "", email: "", mobile: "", city: "", message: "" })
-    } else {
-      toast.error(data.message)
+  const handleSubmit =async (e) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    const data =await addCompaignMasseage(id,formData)
+    if(data.success){
+      toast.success(data.message);
+      setFormData({ name: "", email: "", mobile: "", city: "", message: "" });
+    }else{
+      toast.error(data.message);
     }
-  }
+  };
+
+
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % (campaign.image?.length || 1))
-  }
+    setCurrentImageIndex((prev) =>
+      (prev + 1) % (campaign.image?.length || 1)
+    );
+  };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + (campaign.image?.length || 1)) % (campaign.image?.length || 1))
-  }
+    setCurrentImageIndex((prev) =>
+      (prev - 1 + (campaign.image?.length || 1)) %
+      (campaign.image?.length || 1)
+    );
+  };
 
   return (
     <>
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-center" />
       <Navbar fixed={true} />
-
-      <main className="min-h-screen bg-background pt-5">
-        {/* Hero Image Section */}
-        <div className="relative w-full h-[60vh] min-h-[400px] max-h-[700px] overflow-hidden">
-          <img
-            src={campaign.image?.[currentImageIndex] || "/placeholder.svg"}
-            alt={campaign.title}
-            className="w-full h-full object-cover cursor-pointer transition-transform duration-500"
-            onClick={() => setLightboxOpen(true)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
-
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevImage}
-            className="absolute left-6 top-1/2 -translate-y-1/2 bg-card/90 backdrop-blur-sm hover:bg-card text-foreground p-3 rounded-full shadow-lg transition-all hover:scale-105"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-6 top-1/2 -translate-y-1/2 bg-card/90 backdrop-blur-sm hover:bg-card text-foreground p-3 rounded-full shadow-lg transition-all hover:scale-105"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Image Counter */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm px-4 py-2 rounded-full">
-            <span className="text-sm font-medium text-foreground">
-              {currentImageIndex + 1} / {campaign.image?.length || 1}
-            </span>
-          </div>
-
-          {/* Thumbnail Strip */}
-          <div className="absolute bottom-6 right-6 flex gap-2">
-            {campaign.image?.slice(0, 4).map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentImageIndex(i)}
-                className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                  currentImageIndex === i ? "border-primary scale-105" : "border-card/50 opacity-70 hover:opacity-100"
-                }`}
-              >
-                <img
-                  src={img || "/placeholder.svg"}
-                  alt={`Thumbnail ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+      <div className="min-h-screen bg-gray-50 mt-4">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Campaign Header */}
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="space-y-2">
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">{campaign.title}</h1>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      <span>{campaign.address}</span>
-                    </div>
-                  </div>
-                  <Badge className="bg-accent text-accent-foreground px-3 py-1.5 text-base font-semibold">
-                    <Star className="w-4 h-4 fill-current mr-1" />
+            <div className="lg:col-span-2">
+              {/* Main Image */}
+              <div className="relative mb-6">
+                <img
+                  src={
+                    campaign.image?.[currentImageIndex] ||
+                    "/placeholder.svg"
+                  }
+                  alt={campaign.title}
+                  className="w-full h-[500px] object-cover rounded-lg cursor-pointer"
+                  onClick={() => setLightboxOpen(true)}
+                />
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary/80 text-white p-2 rounded-full shadow-lg transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary/80 text-white p-2 rounded-full shadow-lg transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Campaign Info */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-bold">{campaign.title}</h1>
+                  <div className="bg-green-600 text-white px-2 py-1 rounded text-sm flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-white" />
                     {campaign.rating || 4.0}
-                  </Badge>
+                  </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="flex flex-wrap gap-6 pt-2">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">Quick Response</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="w-4 h-4" />
-                    <span className="text-sm">500+ Events Done</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-accent">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-sm font-medium">Verified</span>
-                  </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{campaign.address}</span>
                 </div>
+
+              
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Contact Now
+              <div className="flex flex-wrap gap-3 mb-8">
+                <Button variant="outline" size="sm">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contact
                 </Button>
-                <Button variant="outline" className="border-border bg-transparent">
-                  <Mail className="w-4 h-4 mr-2" />
+                <Button variant="outline" size="sm">
                   Get Best Quotes
                 </Button>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`border-border ${isLiked ? "bg-destructive/10 border-destructive/30" : ""}`}
+                  className="border-gray-300 hover:bg-gray-50"
                 >
                   <Heart
-                    className={`w-4 h-4 mr-2 transition-colors ${isLiked ? "fill-destructive text-destructive" : ""}`}
+                    className={`w-4 h-4 mr-2 ${
+                      isLiked ? "fill-red-500 text-red-500" : ""
+                    }`}
                   />
-                  {isLiked ? "Saved" : "Save"}
+                  Shortlist
                 </Button>
-                <Button variant="outline" className="border-border bg-transparent">
+                <Button variant="outline" size="sm">
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
                 </Button>
               </div>
 
-              <Separator />
-
               {/* Tabs */}
-              <div>
-                <div className="flex items-center gap-1 p-1 bg-muted rounded-lg w-fit">
-                  {["images", "videos", "reviews"].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-5 py-2.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === tab
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
+              <div className="mb-8">
+                <div className="flex items-center gap-8 mb-6 border-b">
+                  <button
+                    onClick={() => setActiveTab("images")}
+                    className={`pb-2 text-sm font-medium ${
+                      activeTab === "images"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Images
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("Videos")}
+                    className={`pb-2 text-sm font-medium ${
+                      activeTab === "Videos"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Videos
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("reviews")}
+                    className={`pb-2 text-sm font-medium ${
+                      activeTab === "reviews"
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    Reviews
+                  </button>
                 </div>
 
-                {/* Images Tab */}
+                {/* images Images */}
                 {activeTab === "images" && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {campaign.image?.map((img, i) => (
-                      <div
-                        key={i}
-                        className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer"
-                        onClick={() => {
-                          setCurrentImageIndex(i)
-                          setLightboxOpen(true)
-                        }}
-                      >
+                      <div key={i} className="aspect-square">
                         <img
-                          src={img || "/placeholder.svg"}
-                          alt={`Gallery ${i + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          src={img}
+                          alt={`images ${i}`}
+                          className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => {
+                            setCurrentImageIndex(i);
+                            setLightboxOpen(true);
+                          }}
                         />
-                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors" />
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Videos Tab */}
-                {activeTab === "videos" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    {campaign.video?.length > 0 ? (
-                      campaign.video.map((video, i) => (
-                        <Card key={i} className="overflow-hidden border-border">
-                          <div className="relative aspect-video bg-muted">
-                            <video src={video} controls className="w-full h-full object-cover" />
-                          </div>
-                          <CardContent className="p-4">
-                            <p className="text-sm font-medium text-foreground">Video {i + 1}</p>
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
-                      <div className="col-span-2 py-12 text-center">
-                        <Play className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground">No videos available</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Reviews Tab */}
-                {activeTab === "reviews" && (
-                  <div className="mt-6 space-y-6">
-                    {/* Reviews Summary */}
-                    <Card className="border-border">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <div className="text-5xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
-                            <div className="flex gap-1 mt-2 justify-center">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`w-5 h-5 ${
-                                    star <= Math.round(averageRating) ? "fill-chart-4 text-chart-4" : "text-muted"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">{totalReviews} reviews</p>
-                          </div>
-                          <Separator orientation="vertical" className="h-20" />
-                          <div className="flex-1 space-y-2">
-                            {[5, 4, 3, 2, 1].map((rating) => (
-                              <div key={rating} className="flex items-center gap-3">
-                                <span className="text-sm text-muted-foreground w-3">{rating}</span>
-                                <Star className="w-4 h-4 text-chart-4 fill-chart-4" />
-                                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-chart-4 rounded-full"
-                                    style={{
-                                      width: `${
-                                        (reviews.filter((r) => r.rating === rating).length / totalReviews) * 100 || 0
-                                      }%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Individual Reviews */}
-                    <div className="space-y-4">
-                      {reviews.length > 0 ? (
-                        reviews.map((r, i) => (
-                          <Card key={i} className="border-border">
-                            <CardContent className="p-5">
-                              <div className="flex items-start gap-4">
-                                <Avatar className="w-10 h-10">
-                                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                                    {r.name?.charAt(0)?.toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <h4 className="font-semibold text-foreground">{r.name}</h4>
-                                    <div className="flex gap-0.5">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star
-                                          key={star}
-                                          className={`w-4 h-4 ${
-                                            star <= r.rating ? "fill-chart-4 text-chart-4" : "text-muted"
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <p className="text-muted-foreground leading-relaxed">{r.comment}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {new Date(r.date).toLocaleDateString("en-US", {
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                    })}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))
-                      ) : (
-                        <div className="py-12 text-center">
-                          <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                          <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
-                        </div>
-                      )}
-                    </div>
+                {/* Videos */}
+                {activeTab === "Videos" && (
+                  <div className="text-gray-700 leading-relaxed">
+                    {campaign.video?.map((video, i) => (
+                      <div key={i} className="mb-4">
+                        <h4 className="font-medium mb-2 text-gray-700">
+                          Video {i + 1}
+                        </h4>
+                        <video
+                          src={video}
+                          controls
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      </div>  
+                    ))}
                   </div>
                 )}
               </div>
-
-              {/* About Section */}
-              <Card className="border-border">
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-bold text-foreground mb-4">About</h2>
-                  <div
-                    className="prose prose-neutral max-w-none text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: campaign.description }}
-                  />
-                </CardContent>
-              </Card>
             </div>
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
-                {/* Pricing Card */}
-                <Card className="border-border shadow-lg">
-                  <CardContent className="p-6 space-y-6">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Starting Price</p>
-                      <p className="text-4xl font-bold text-foreground">
-                        {"₹"}
-                        {campaign.price?.toLocaleString() || "N/A"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Approx Budget</p>
-                    </div>
+              <div className="bg-white rounded-lg p-6 shadow-sm sticky top-6">
+                <div className="mb-6">
+                  <h4 className="font-medium mb-2 text-gray-700">
+                    Starting Price
+                  </h4>
+                  <p className="text-2xl font-bold text-primary">
+                    ₹{campaign.price?.toLocaleString() || "N/A"}
+                  </p>
+                  <p className="text-sm text-gray-500">Approx Budget</p>
+                </div>
 
-                    <div className="flex gap-3">
-                      <Button className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Send Message
-                      </Button>
-                      <Button className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground">
-                        View Contact
-                      </Button>
-                    </div>
+                <div className="flex gap-2 mb-6">
+                  <Button className="flex-1 bg-primary text-white">
+                    Send Message
+                  </Button>
+                  <Button className="flex-1 bg-green-600 text-white">
+                    View Contact
+                  </Button>
+                </div>
 
-                    <Separator />
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <h3 className="font-semibold text-foreground">Get in Touch</h3>
-                      <div className="grid grid-cols-1 gap-3">
-                        <Input
-                          name="name"
-                          placeholder="Your Name *"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                          className="bg-background border-input"
-                        />
-                        <div className="flex">
-                          <span className="inline-flex items-center px-3 text-sm bg-muted border border-r-0 border-input rounded-l-md text-muted-foreground">
-                            +91
-                          </span>
-                          <Input
-                            name="mobile"
-                            placeholder="Mobile Number"
-                            value={formData.mobile}
-                            onChange={handleInputChange}
-                            className="rounded-l-none bg-background border-input"
-                          />
-                        </div>
-                        <Input
-                          name="email"
-                          type="email"
-                          placeholder="Email Address"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="bg-background border-input"
-                        />
-                        <Input
-                          name="city"
-                          placeholder="City / Location"
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          className="bg-background border-input"
-                        />
-                        <Textarea
-                          name="message"
-                          placeholder="Your Message *"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          rows={4}
-                          required
-                          className="bg-background border-input resize-none"
-                        />
-                      </div>
-                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Send Message
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-
-                {/* Write Review Card */}
-                <Card className="border-border">
-                  <CardContent className="p-6 space-y-4">
-                    <h3 className="font-semibold text-foreground">Write a Review</h3>
-                    <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      name="name"
+                      placeholder="Name*"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="text-sm"
+                    />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 text-sm bg-gray-100 border border-r-0 rounded-l-md">
+                        🇮🇳 +91
+                      </span>
                       <Input
-                        name="name"
-                        placeholder="Your Name *"
-                        value={reviewForm.name}
-                        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                        required
-                        className="bg-background border-input"
+                        name="mobile"
+                        placeholder=""
+                        value={formData.mobile}
+                        onChange={handleInputChange}
+                        className="rounded-l-none text-sm"
                       />
-                      <Input
-                        name="email"
-                        placeholder="Email (optional)"
-                        value={reviewForm.email}
-                        onChange={(e) =>
-                          setReviewForm({
-                            ...reviewForm,
-                            email: e.target.value,
-                          })
-                        }
-                        className="bg-background border-input"
+                    </div>
+                  </div>
+                  
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="Email address"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="text-sm"
+                  />
+                  <Input
+                    name="city"
+                    placeholder="Function city/location"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="text-sm"
+                  />
+                  <Textarea
+                    name="message"
+                    placeholder="Message*"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    rows={4}
+                    required
+                    className="text-sm resize-none"
+                  />
+
+                  {/* <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-gray-700">
+                      Notify me via WhatsApp
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setWhatsappNotify(!whatsappNotify)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        whatsappNotify ? "bg-primary" : "bg-gray-200"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          whatsappNotify ? "translate-x-6" : "translate-x-1"
+                        }`}
                       />
-                      {/* Rating Stars */}
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Your Rating</p>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5].map((num) => (
-                            <button
-                              key={num}
-                              type="button"
-                              onClick={() => setReviewForm({ ...reviewForm, rating: num })}
-                              className="p-1 transition-transform hover:scale-110"
-                            >
-                              <Star
-                                className={`w-7 h-7 transition-colors ${
-                                  num <= reviewForm.rating
-                                    ? "fill-chart-4 text-chart-4"
-                                    : "text-muted hover:text-chart-4"
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <Textarea
-                        name="comment"
-                        placeholder="Share your experience..."
-                        value={reviewForm.comment}
-                        onChange={(e) =>
-                          setReviewForm({
-                            ...reviewForm,
-                            comment: e.target.value,
-                          })
-                        }
-                        required
-                        className="bg-background border-input resize-none"
-                        rows={4}
-                      />
-                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Submit Review
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
+                    </button>
+                  </div> */}
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary hover:bg-primary/80 text-white"
+                  >
+                    Send Message
+                  </Button>
+                </form>
               </div>
             </div>
           </div>
-        </div>
-      </main>
 
-      {/* Lightbox */}
+          {/* About Section */}
+          <div className="bg-white rounded-lg p-6 shadow-sm my-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">About</h2>
+            <p className="text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: campaign.description }}>
+              
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Lightbox / Image Preview */}
       {lightboxOpen && (
-        <div className="fixed inset-0 bg-foreground/95 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
           <button
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-6 right-6 text-background hover:text-background/80 transition-colors"
+            className="absolute top-6 right-6 text-white"
           >
-            <X className="w-8 h-8" />
+            <X className="w-6 h-6" />
           </button>
+
           <button
             onClick={prevImage}
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-background hover:text-background/80 p-3 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2"
           >
-            <ChevronLeft className="w-10 h-10" />
+            <ChevronLeft className="w-8 h-8" />
           </button>
+
           <img
-            src={campaign.image?.[currentImageIndex] || "/placeholder.svg"}
+            src={campaign.image?.[currentImageIndex]}
             alt="Full view"
             className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
           />
+
           <button
             onClick={nextImage}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-background hover:text-background/80 p-3 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2"
           >
-            <ChevronRight className="w-10 h-10" />
+            <ChevronRight className="w-8 h-8" />
           </button>
-          {/* Lightbox Counter */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-background">
-            <span className="text-lg font-medium">
-              {currentImageIndex + 1} / {campaign.image?.length || 1}
-            </span>
-          </div>
         </div>
       )}
 
+      
+<div className="bg-white rounded-lg p-6 shadow-sm my-6 max-w-7xl mx-auto">
+  <h2 className="text-2xl font-bold mb-2">Reviews</h2>
+  <p className="text-gray-500 mb-4">
+    ⭐ {averageRating.toFixed(1)} / 5 ({totalReviews} reviews)
+  </p>
+
+  {/* Existing Reviews */}
+  <div className="space-y-4 mb-8">
+    {reviews.length > 0 ? (
+      reviews.map((r, i) => (
+        <div key={i} className="border-b pb-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold">{r.name}</h4>
+            <span className="text-yellow-500">
+              {"⭐".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+            </span>
+          </div>
+          <p className="text-gray-700 mt-1">{r.comment}</p>
+          <p className="text-xs text-gray-400">
+            {new Date(r.date).toLocaleDateString()}
+          </p>
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-500">No reviews yet.</p>
+    )}
+  </div>
+
+  {/* Add Review Form */}
+  <form onSubmit={handleReviewSubmit} className="space-y-4 border-t pt-4">
+    <h3 className="text-lg font-semibold text-gray-800">Leave a Review</h3>
+    <div className="grid grid-cols-2 gap-3">
+      <Input
+        name="name"
+        placeholder="Name*"
+        value={reviewForm.name}
+        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+        required
+      />
+      <Input
+        name="email"
+        placeholder="Email"
+        value={reviewForm.email}
+        onChange={(e) => setReviewForm({ ...reviewForm, email: e.target.value })}
+      />
+    </div>
+
+    {/* Rating Stars */}
+    <div className="flex gap-2">
+      {[1, 2, 3, 4, 5].map((num) => (
+        <span
+          key={num}
+          onClick={() => setReviewForm({ ...reviewForm, rating: num })}
+          className={`cursor-pointer text-2xl ${
+            num <= reviewForm.rating ? "text-yellow-400" : "text-gray-300"
+          }`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+
+    <Textarea
+      name="comment"
+      placeholder="Write your review..."
+      value={reviewForm.comment}
+      onChange={(e) =>
+        setReviewForm({ ...reviewForm, comment: e.target.value })
+      }
+      required
+    />
+
+    <Button type="submit" className="bg-primary text-white hover:bg-primary/80">
+      Submit Review
+    </Button>
+  </form>
+</div>
+
       <Footer />
     </>
-  )
+  );
 }

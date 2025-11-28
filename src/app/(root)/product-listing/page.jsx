@@ -1,5 +1,5 @@
 "use client"
-
+import { Suspense } from "react";
 import { useState, useMemo, useContext } from "react"
 import { useSearchParams } from "next/navigation"
 import { Star, MapPin, Filter, X } from "lucide-react"
@@ -306,6 +306,7 @@ export default function BusinessDirectory() {
 
   return (
     <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Navbar fixed={true} />
       <div className="min-h-screen bg-gray-50 max-w-7xl mx-auto my-4">
         {/* Mobile Filter Overlay */}
@@ -363,6 +364,7 @@ export default function BusinessDirectory() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredBusinesses.map((b, index) => (
                 <motion.div
+                  key={index}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
@@ -375,7 +377,7 @@ export default function BusinessDirectory() {
                   className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
                 >
 
-                  <Link href={`/product-details/${b.id}`} key={b.id} className="overflow-hidden  transition- !py-0">
+                  <Link href={`/product-details/${b.id}`} key={b._id} className="overflow-hidden  transition- !py-0">
                     <div className="relative">
                       <motion.img
                         src={b.image}
@@ -418,7 +420,7 @@ export default function BusinessDirectory() {
                           {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
                         </span>
                         <Button size="sm">
-                          <Link href={`/product-details/${b.id}`}>View Details</Link>
+                          <div >View Details</div>
                         </Button>
                       </div>
                     </CardContent>
@@ -442,6 +444,7 @@ export default function BusinessDirectory() {
         </div>
       </div>
       <Footer />
+      </Suspense>
     </>
   )
 }
