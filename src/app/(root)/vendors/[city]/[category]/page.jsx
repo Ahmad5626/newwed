@@ -18,6 +18,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Hedaer";
 import { AuthContext } from "@/app/context/page";
 import Link from "next/link";
+import { motion } from "framer-motion"
 
 export default function BusinessDirectory() {
   const router = useRouter();
@@ -142,6 +143,8 @@ export default function BusinessDirectory() {
     return filtered;
   }, [normalized, selectedCategory, selectedCity, selectedAmenities, priceRange, minRating, openOnly, sortBy]);
 
+
+  
   // small UI helpers
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -149,7 +152,9 @@ export default function BusinessDirectory() {
         key={i}
         className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
       />
-    ));
+    ))
+
+
 
   const clearAllFilters = () => {
     setSelectedCategory("All");
@@ -159,8 +164,7 @@ export default function BusinessDirectory() {
     setMinRating(0);
     setOpenOnly(false);
     setSortBy("rating");
-    // optionally navigate back to /vendors (clear URL)
-    // router.push("/vendors");
+    
   };
 
   // handle search navigation (if you want to navigate using filters)
@@ -169,6 +173,12 @@ export default function BusinessDirectory() {
     const catSlug = (catVal || "").toString().trim().toLowerCase().replaceAll(/\s+/g, "-");
     router.push(`/vendors/${citySlug || "all"}/${catSlug || "all"}`);
   };
+
+        const getAverageRating = (reviews) => {
+    if (!Array.isArray(reviews) || reviews.length === 0) return 0
+    const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0)
+    return (total / reviews.length).toFixed(1)
+  }
 
   const FilterSidebar = () => (
     <div className="w-full lg:w-72 bg-white border-r border-gray-200 p-6 space-y-6">
@@ -342,48 +352,73 @@ export default function BusinessDirectory() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredBusinesses.map((b) => (
-                <Card key={b.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48 overflow-hidden" >
-                    <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full " />
-                  </div>
-
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900 text-lg leading-tight">{b.title}</h3>
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{b.category}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex">{renderStars(b.rating)}</div>
-                      <span className="text-sm text-gray-600">
-                        {b.rating} ({b.reviews} reviews)
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1 mb-3">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        {b.location}
-                        {b.country ? `, ${b.country}` : ""}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-lg text-gray-900">
-                        ₹{b.priceRange[0].toLocaleString()}
-                        {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
-                      </span>
-
-                      <Button size="sm">
-                        <Link href={`/product-details/${b.id}`}>View Details</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                         {filteredBusinesses.map((b, index) => (
+                           <motion.div
+                             initial={{ opacity: 0, y: 50 }}
+                             whileInView={{ opacity: 1, y: 0 }}
+                             viewport={{ once: true, margin: "-100px" }}
+                             transition={{
+                               duration: 0.6,
+                               delay: index * 0.1,
+                               ease: "easeOut",
+                             }}
+                             whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                             className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                           >
+           
+                             <Link href={`/product-details/${b.id}`} key={b.id} className="overflow-hidden  transition- !py-0">
+                               <div className="relative">
+                                <motion.img
+                     src={b.image}
+                     alt={b.title}
+                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                     whileHover={{ scale: 1.05 }}
+                   />
+                                 {/* <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full h-48 object-cover" /> */}
+                               </div>
+                               <CardContent className="p-4 ">
+                                 <div className="flex items-start justify-between mb-2">
+                                   <h3 className="font-semibold text-gray-900 text-lg leading-tight py-2">{b.title}</h3>
+                                   {/* <span className="px-3 py-1 rounded-full text-xs font-medium text-white bg-blue-500 capitalize">
+                                     {b.category}
+                                   </span> */}
+                                 </div>
+           
+                                 <div className="flex items-center gap-2 mb-4">
+                                   <div className="flex">
+                                     {renderStars(b.reviews.length > 0 ? getAverageRating(b.reviews) : b.rating)}
+                                   </div>
+                                   <span className="text-sm text-gray-600">
+                                     {b.reviews.length > 0 ? getAverageRating(b.reviews) : b.rating} ({b.reviewCount} reviews)
+                                   </span>
+                                 </div>
+           
+                              
+           
+                                 <div className="flex items-center gap-1 mb-3">
+                                   <MapPin className="-4 h-4 text-primary" />
+                                   <span className="text-sm text-gray-600">
+                                     {b.location}
+                                     {b.country ? `, ${b.country}` : ""}
+                                   </span>
+                                 </div>
+           
+                                 <div className="flex items-center justify-between">
+                                   <span className="font-semibold text-lg text-gray-900">
+                                     ₹{b.priceRange[0].toLocaleString()}
+                                     {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
+                                   </span>
+                                   <Button size="sm">
+                                     <Link href={`/product-details/${b.id}`}>View Details</Link>
+                                   </Button>
+                                 </div>
+                               </CardContent>
+                             </Link>
+                           </motion.div>
+           
+                         ))}
+                       </div>
 
             {filteredBusinesses.length === 0 && (
               <div className="text-center py-12">

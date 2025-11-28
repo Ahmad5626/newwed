@@ -65,6 +65,16 @@ export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState("information")
   const [userCampaign, setUserCampaign] = useState([])
   const [sidebarOpen, setSidebarOpen] = useState(false) // Added state for mobile sidebar toggle
+
+  const [cityInput, setCityInput] = useState("");
+
+
+
+const handleRemoveCity = (index) => {
+  const updatedCities = newProject.cities.filter((_, i) => i !== index);
+  setNewProject({ ...newProject, cities: updatedCities });
+};
+
   const getProfileData = async () => {
     try {
       const data = await getSingleCampaign()
@@ -98,10 +108,21 @@ export default function VendorDashboard() {
     description: "",
     price: "",
     address: "",
+    cities: [],
     video: [],
     image: [],
+    
     createdBy: authenticatedUser._id
   })
+  const handleAddCity = () => {
+  if (!cityInput.trim()) return;
+  if (newProject.cities.includes(cityInput.trim())) return; // avoid duplicate
+  setNewProject({
+    ...newProject,
+    cities: [...newProject.cities, cityInput.trim()],
+  });
+  setCityInput("");
+};
 
   const handleAddProject = async (e) => {
     e.preventDefault()
@@ -117,6 +138,7 @@ export default function VendorDashboard() {
         description: "",
         price: "",
         address: "",
+        cities: [],
         video: [],
         image: [],
       })
@@ -477,6 +499,45 @@ export default function VendorDashboard() {
                         rows={3}
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Cities</label>
+
+                      {/* Input + Button */}
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter city & press Add"
+                          value={cityInput}
+                          onChange={(e) => setCityInput(e.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleAddCity}
+                          className="bg-primary text-white"
+                        >
+                          Add
+                        </Button>
+                      </div>
+
+                      {/* Selected Cities */}
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {newProject.cities.map((city, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-coral-50 text-coral-600 border border-coral-200 rounded-full text-sm flex items-center gap-1"
+                          >
+                            {city}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCity(index)}
+                              className="ml-1 text-red-500 hover:text-red-700"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
 
@@ -485,12 +546,7 @@ export default function VendorDashboard() {
                         onChange={(e) => setNewProject({ ...newProject, description: e })}
                         placeholder="Start writing your amazing content here..."
                       />
-                      {/* <Textarea
-                        value={newProject.description}
-                        onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                        placeholder="Describe your project"
-                        rows={3}
-                      /> */}
+
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Upload image</label>

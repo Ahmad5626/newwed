@@ -29,7 +29,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('./assets/img/banner-2.jpg')`,
+          backgroundImage: `url('/assets/img/banner-2.jpg')`,
         }}
       >
         <div className="absolute inset-0 bg-black/50"></div>

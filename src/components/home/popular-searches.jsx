@@ -82,7 +82,7 @@ export default function PopularSearches() {
         >
           {searchData.map((item) => (
             <SplideSlide key={item.id}>
-              <Link href={"/product-listing"} className="block group">
+              <Link href={`/product-listing?category=${item.title}`} className="block group">
                 <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-300 group-hover:scale-105">
                   <div className="aspect-[4/5] overflow-hidden relative">
                     <img

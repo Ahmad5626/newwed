@@ -66,7 +66,7 @@ export default function PopularVenueSearches() {
             <SplideSlide key={venue.id}>
               <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
                 <div className="aspect-[4/3] overflow-hidden">
-                <Link href={"/product-listing"}>
+                <Link href={`/product-listing?cities=${venue.locations}`}>
 
                   <img
                     src={venue.image || "/placeholder.svg"}

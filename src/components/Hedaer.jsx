@@ -408,7 +408,7 @@ export default function Navbar({ fixed }) {
         {isMenuOpen && (
           <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg rounded-b-lg">
-              <Link href="/" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Venues
 
               </Link>
@@ -423,50 +423,35 @@ export default function Navbar({ fixed }) {
                 </button>
                 {isVendorsOpen && (
                   <div className="pl-6 space-y-2 max-h-96 overflow-y-auto">
-                    {vendorCategories.map((category, index) => {
-                      const IconComponent = category.icon
-                      return (
-                        <div key={index} className="space-y-1">
-                          <div className="flex items-center space-x-2 text-coral-500 font-medium text-sm py-1">
-                            <IconComponent className="h-4 w-4 text-primary" />
-                            <span className="text-primary">{category.title}</span>
+                      {categories.map((category, index) => {
+                        
+                        return (
+                          <div key={index} className="space-y-3">
+                               <a
+                                  key={index}
+                                  href={`/product-listing?category=${category.slug}`}
+                                  className="text-sm font-medium text-gray-800 group-hover:text-coral-500 transition-colors duration-200"
+                                >
+                                  {category.name}
+                                </a>
+                          
                           </div>
-                          <div className="pl-6 space-y-1">
-                            {category.items.slice(0, 3).map((item, itemIndex) => (
-                              <a
-                                key={itemIndex}
-                                href="#"
-                                className="block text-sm text-gray-600 hover:text-coral-600 py-1"
-                              >
-                                {item}
-                              </a>
-                            ))}
-                            {category.items.length > 3 && (
-                              <span className="text-xs text-gray-400">+{category.items.length - 3} more</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
                   </div>
                 )}
               </div>
-              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/gallery" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Gallery
               </Link>
-              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/invite" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 E-invites
 
               </Link>
-              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Planner
 
               </Link>
-
-
-
-
-
 
               <Link href="/about" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Our Story
@@ -474,7 +459,7 @@ export default function Navbar({ fixed }) {
               <Link href="/blog" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Blog
               </Link>
-              <Link href="/product-listing" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
+              <Link href="/" className="block hover:text-coral-500 px-3 py-2 text-base font-medium text-gray-900">
                 Mojo
 
               </Link>

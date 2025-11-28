@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { Heart, Building2, Plane, Hotel, Utensils, Car } from "lucide-react"
+import Link from "next/link"
 
 const categories = [
   {
@@ -12,7 +13,7 @@ const categories = [
   },
   {
     id: 2,
-    name: "Decorators",
+    name: "bartender",
    
     icon: Building2,
   },
@@ -97,9 +98,9 @@ export default function CategoriesSlider() {
                   <div className="text-center py-8 px-4 bg-white shadow-sm border border-gray-200 rounded-lg mx-2">
                     <div className="mb-6">
                       <div className="w-16 h-16 mx-auto bg-white rounded-lg flex items-center justify-center shadow-sm">
-                      <a href={`/product-listing`}>
+                      <Link href={`/product-listing?category=${category.name}`}>
                         <IconComponent className="h-10 w-10 text-red-500" />
-                      </a>
+                      </Link>
                       </div>
                     </div>
 

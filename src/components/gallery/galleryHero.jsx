@@ -13,6 +13,7 @@ export default function GalleryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flatImages, setFlatImages] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("all");
 
   // 🔹 Flatten all images into a single array for modal navigation
   const allImages = useMemo(() => {
@@ -40,7 +41,10 @@ export default function GalleryPage() {
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-    return matchesVendor && matchesSearch;
+    const matchesCity =
+      selectedCity === "all" || item.cities?.includes(selectedCity);
+
+    return matchesVendor && matchesSearch && matchesCity;
   });
 
   // 🔹 Open modal with selected image index
@@ -63,10 +67,23 @@ export default function GalleryPage() {
     );
   };
 
+
+
+
+
+  const cityList = useMemo(() => {
+    let arr = [];
+    campaignData.forEach((item) => {
+      item.cities?.forEach((c) => arr.push(c));
+    });
+    return ["all", ...new Set(arr)];
+  }, [campaignData]);
+
+
   return (
     <section className="bg-gray-100 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-6">
-        
+
         {/* ---------------- TOP FILTER BAR ---------------- */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
           {/* Vendor Type Filter */}
@@ -76,10 +93,9 @@ export default function GalleryPage() {
                 key={i}
                 onClick={() => setSelectedVendor(type)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition 
-                  ${
-                    selectedVendor === type
-                      ? "bg-secondary text-white"
-                      : "bg-white text-gray-700 border"
+                  ${selectedVendor === type
+                    ? "bg-primary text-white"
+                    : "bg-white text-gray-700 border"
                   }`}
               >
                 {type}
@@ -97,16 +113,31 @@ export default function GalleryPage() {
           />
         </div>
 
+
+        <div className="flex gap-2 overflow-x-auto py-4">
+          {cityList.map((city, i) => (
+            <button
+              key={i}
+              onClick={() => setSelectedCity(city)}
+              className={`px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap transition 
+        ${selectedCity === city
+                  ? "bg-primary text-white"
+                  : "bg- text-gray-600 border"
+                }`}
+            >
+              {city}
+            </button>
+          ))}
+        </div>
+
+
         {/* ---------------- MASONRY GALLERY ---------------- */}
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-          {campaignData &&
-            campaignData.map((item, itemIndex) =>
+          {filteredData &&
+            filteredData.map((item, itemIndex) =>
               item.image?.map((img, imgIndex) => {
-                
-                // Global index for clicking
-                const globalIndex = allImages.findIndex(
-                  (x) => x.img === img
-                );
+
+                const globalIndex = allImages.findIndex((x) => x.img === img);
 
                 return (
                   <div
@@ -121,12 +152,8 @@ export default function GalleryPage() {
                     />
 
                     <div className="p-3">
-                      <p className="font-semibold text-gray-900">
-                        {item.title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {item.vendorType}
-                      </p>
+                      <p className="font-semibold text-gray-900">{item.title}</p>
+                      <p className="text-sm text-gray-500">{item.vendorType}</p>
                     </div>
                   </div>
                 );
@@ -145,7 +172,7 @@ export default function GalleryPage() {
       {/* ---------------- FULLSCREEN MODAL ---------------- */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          
+
           {/* Close Button */}
           <button
             onClick={() => setModalOpen(false)}

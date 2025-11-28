@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { Heart, MapPin, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-
+import { AuthContext } from "@/app/context/page"
+import { Card, CardContent } from "@/components/ui/card"
 const listings = [
   {
     id: 1,
@@ -76,6 +77,8 @@ const listings = [
 ]
 
 const StarRating = ({ rating, reviewCount }) => {
+
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center">
@@ -95,6 +98,19 @@ const StarRating = ({ rating, reviewCount }) => {
 
 const ListingCard = ({ listing, index }) => {
   const [isFavorited, setIsFavorited] = useState(listing.isFavorited)
+  const renderStars = (rating) =>
+    Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+      />
+    ))
+
+  const getAverageRating = (reviews) => {
+    if (!Array.isArray(reviews) || reviews.length === 0) return 0
+    const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0)
+    return (total / reviews.length).toFixed(1)
+  }
 
   return (
     <motion.div
@@ -109,103 +125,91 @@ const ListingCard = ({ listing, index }) => {
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
       className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
     >
-      {/* Image Container */}
-      <Link href={`/product-details`} className="relative overflow-hidden">
-        <motion.img
-          src={listing.image}
-          alt={listing.title}
-          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-          whileHover={{ scale: 1.05 }}
-        />
 
-        {/* Favorite Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-3 right-3 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-md"
-          onClick={() => setIsFavorited(!isFavorited)}
-        >
-          <Heart
-            className={`w-5 h-5 transition-colors duration-200 ${
-              isFavorited ? "fill-red-500 text-red-500" : "text-gray-600"
-            }`}
+      <Link href={`/product-details/${listing._id}`} key={listing.id} className="overflow-hidden  transition- !py-0">
+        <div className="relative">
+          <motion.img
+            src={listing.image?.[0]}
+            alt={listing.title}
+            className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+            whileHover={{ scale: 1.05 }}
           />
-        </Button>
-      </Link>
-
-      {/* Content */}
-      <div className="p-6">
-        {/* Owner Info */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <img
-              src={listing.owner.avatar || "/placeholder.svg"}
-              alt={listing.owner.name}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <span className="text-sm text-gray-600">By {listing.owner.name}</span>
+          {/* <img src={listing.image || "/placeholder.svg"} alt={listing.title} className="w-full h-48 object-cover" /> */}
+        </div>
+        <CardContent className="p-4 ">
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="font-semibold text-gray-900 text-lg leading-tight py-2">{listing.title}</h3>
+            {/* <span className="px-3 py-1 rounded-full text-xs font-medium text-white bg-blue-500 capitalize">
+                          {listing.category}
+                        </span> */}
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${listing.categoryColor}`}>
-            {listing.category}
-          </span>
-        </div>
 
-        {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200">
-          {listing.title}
-        </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex">
+              {renderStars(listing.reviews.length > 0 ? getAverageRating(listing.reviews) : listing.rating)}
+            </div>
+            <span className="text-sm text-gray-600">
+              {listing.reviews.length > 0 ? getAverageRating(listing.reviews) : listing.rating} ({listing.reviewCount} reviews)
+            </span>
+          </div>
 
-        {/* Rating */}
-        <div className="mb-3">
-          <StarRating rating={listing.rating} reviewCount={listing.reviewCount} />
-        </div>
 
-        {/* Location */}
-        <div className="flex items-center gap-2 mb-4 text-gray-600">
-          <MapPin className="w-4 h-4 text-primary" />
-          <span className="text-sm">{listing.location}</span>
-        </div>
 
-        {/* Price */}
-        <div className="text-lg font-semibold text-gray-900">
-          <span className="text-gray-600 font-normal">From </span>
-          {listing.priceRange}
-        </div>
-      </div>
+          <div className="flex items-center gap-1 mb-3">
+            <MapPin className="-4 h-4 text-primary" />
+            <span className="text-sm text-gray-600">
+              {listing.location}
+              {listing.country ? `, ${listing.country}` : ""}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-lg text-gray-900">
+              ₹{listing.price}
+            </span>
+            <div size="sm">
+              <Link href={`/product-details/${listing._id}`}>View Details</Link>
+            </div>
+          </div>
+        </CardContent>
+      </Link>
     </motion.div>
   )
 }
 
 export default function Listing() {
   const splideRef = useRef(null)
+  const { campaignData } = useContext(AuthContext)
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("@splidejs/splide").then(({ Splide }) => {
-        if (splideRef.current) {
-          new Splide(splideRef.current, {
+useEffect(() => {
+  let slider;
+
+  if (typeof window !== "undefined" && campaignData.length > 0) {
+    import("@splidejs/splide").then(({ Splide }) => {
+      if (splideRef.current) {
+        setTimeout(() => {
+          slider = new Splide(splideRef.current, {
             type: "loop",
             perPage: 4,
             perMove: 1,
             gap: "1.5rem",
             pagination: true,
             arrows: true,
+            drag: true,
             breakpoints: {
-              1024: {
-                perPage: 3,
-              },
-              768: {
-                perPage: 2,
-              },
-              640: {
-                perPage: 1,
-              },
+              1024: { perPage: 3 },
+              768: { perPage: 2 },
+              640: { perPage: 1 },
             },
-          }).mount()
-        }
-      })
-    }
-  }, [])
+          });
+          slider.mount();
+        }, 100); // ⬅️ 100ms delay fixes first render layout shift
+      }
+    });
+  }
+
+  return () => slider && slider.destroy();
+}, [campaignData]);
 
   return (
     <section className="py-16 bg-gray-50  max-w-7xl mx-auto">
@@ -231,11 +235,11 @@ export default function Listing() {
         </motion.div>
 
         {/* Listings Slider */}
-        <div ref={splideRef} className="splide">
+        <div ref={splideRef} className="splide splide--ltr splide--slide">
           <div className="splide__track">
             <ul className="splide__list">
-              {listings.map((listing, index) => (
-                <li key={listing.id} className="splide__slide">
+              {campaignData.map((listing, index) => (
+                <li key={index} className="splide__slide">
                   <ListingCard listing={listing} index={index} />
                 </li>
               ))}
@@ -251,12 +255,13 @@ export default function Listing() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-12"
         >
-          <Button
+          <Link 
+            href="/product-listing"
             size="lg"
             className="bg-primary hover:bg-orange-600 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105"
           >
             View All Listings
-          </Button>
+          </Link>
         </motion.div>
       </div>
 

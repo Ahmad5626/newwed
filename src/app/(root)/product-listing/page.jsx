@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { useState, useMemo, useContext } from "react";
-import { Star, MapPin, Filter, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Hedaer";
-import { AuthContext } from "@/app/context/page";
-import Link from "next/link";
-
-const categories = ["All", "Bars", "Restaurants", "Hotels", "Fitness", "Beauty", "Technology", "Food", "Automotive"];
+import { useState, useMemo, useContext } from "react"
+import { useSearchParams } from "next/navigation"
+import { Star, MapPin, Filter, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
+import Footer from "@/components/Footer"
+import Navbar from "@/components/Hedaer"
+import { AuthContext } from "@/app/context/page"
+import Link from "next/link"
+import { motion } from "framer-motion"
 const cities = [
   "All Cities",
   "New York",
@@ -27,106 +27,185 @@ const cities = [
   "Phoenix",
   "Portland",
   "Austin",
-];
-const amenities = ["Free Wifi", "Parking", "Air Conditioning", "Swimming Pool", "Pet Friendly"];
+]
+const amenities = ["Free Wifi", "Parking", "Air Conditioning", "Swimming Pool", "Pet Friendly"]
 
 export default function BusinessDirectory() {
-  const { campaignData } = useContext(AuthContext);
+  const { campaignData } = useContext(AuthContext)
+  const searchParams = useSearchParams()
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedCity, setSelectedCity] = useState("All Cities");
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 100000]); // INR
-  const [minRating, setMinRating] = useState(0);
-  const [openOnly, setOpenOnly] = useState(false);
-  const [sortBy, setSortBy] = useState("rating");
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const urlCategory = searchParams.get("category") || "All"
+  const urlCities = searchParams.get("cities") || "" 
+
+
+  const newurlCategory=urlCategory.replaceAll("-"," ").trim()
+
+  const urlCitiesArray = useMemo(() => {
+    if (!urlCities) return []
+    return urlCities
+      .split(",")
+      .map((city) => city.trim())
+      .filter((city) => city.length > 0)
+  }, [urlCities])
+
+
+  const categories = useMemo(() => {
+    if (!Array.isArray(campaignData)) return ["All"]
+    const vendorTypes = campaignData.map((c) => c.vendorType).filter((v) => v && typeof v === "string")
+    const uniqueTypes = [...new Set(vendorTypes)]
+    return ["All", ...uniqueTypes]
+  }, [campaignData])
+
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    if (newurlCategory === "All") return "All"
+    // Case-insensitive match for URL parameter
+    const matchedCategory = categories.find((cat) => cat.toLowerCase() === newurlCategory.toLowerCase())
+    return matchedCategory || "All"
+  })
+
+    const allAvailableCities = useMemo(() => {
+    if (!Array.isArray(campaignData)) return []
+    const allCities = campaignData
+      .flatMap((c) => (Array.isArray(c.cities) ? c.cities : []))
+      .filter((city) => city && typeof city === "string")
+    return [...new Set(allCities)]
+  }, [campaignData])
+
+  const [selectedCity, setSelectedCity] = useState("All Cities")
+   const [selectedCities, setSelectedCities] = useState([]) 
+  const [selectedAmenities, setSelectedAmenities] = useState([])
+  const [priceRange, setPriceRange] = useState([0, 100000])
+  const [minRating, setMinRating] = useState(0)
+  const [openOnly, setOpenOnly] = useState(false)
+  const [sortBy, setSortBy] = useState("rating")
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+
+  useMemo(() => {
+    if (newurlCategory !== "All" && categories.length > 1) {
+      const matchedCategory = categories.find((cat) => cat.toLowerCase() === newurlCategory.toLowerCase())
+      if (matchedCategory && matchedCategory !== selectedCategory) {
+        setSelectedCategory(matchedCategory)
+      }
+    }
+
+        if (urlCitiesArray.length > 0) {
+      const matchedCities = urlCitiesArray
+        .filter((urlCity) => allAvailableCities.some((city) => city.toLowerCase() === urlCity.toLowerCase()))
+        .map((urlCity) => allAvailableCities.find((city) => city.toLowerCase() === urlCity.toLowerCase()) || urlCity)
+      if (matchedCities.length > 0) {
+        setSelectedCities(matchedCities)
+      }
+    }
+  }, [newurlCategory,urlCitiesArray, categories])
 
   const getCityFromAddress = (addr) => {
-    if (!addr) return "";
-    const parts = addr.split(",").map((s) => s.trim());
-    if (parts.length >= 2) return parts[parts.length - 2];
-    return parts[0] || "";
-  };
+    if (!addr) return ""
+    const parts = addr.split(",").map((s) => s.trim())
+    if (parts.length >= 2) return parts[parts.length - 2]
+    return parts[0] || ""
+  }
   const getCountryFromAddress = (addr) => {
-    if (!addr) return "";
-    const parts = addr.split(",").map((s) => s.trim());
-    return parts[parts.length - 1] || "";
-  };
+    if (!addr) return ""
+    const parts = addr.split(",").map((s) => s.trim())
+    return parts[parts.length - 1] || ""
+  }
 
   const normalized = useMemo(() => {
-    if (!Array.isArray(campaignData)) return [];
+    if (!Array.isArray(campaignData)) return []
     return campaignData.map((c) => {
-      const city = getCityFromAddress(c.address);
-      const country = getCountryFromAddress(c.address);
+      const city = getCityFromAddress(c.address)
+      const country = getCountryFromAddress(c.address)
       return {
         id: c._id || c.id,
         title: c.title || "Untitled",
-        category: c.category || "General",
+        category: c.vendorType || "General",
         image: Array.isArray(c.image) && c.image.length ? c.image[0] : "",
         rating: Number(c.rating ?? 0),
-        reviews: Number(c.reviews ?? 0),
+        reviews: Array.isArray(c.reviews) ? c.reviews : [],
+        reviewCount: Array.isArray(c.reviews) ? c.reviews.length : 0,
         location: city,
+        cities: Array.isArray(c.cities) ? c.cities : [],
         country,
         priceRange: [Number(c.price ?? 0), Number(c.price ?? 0)],
         isOpen: c.isOpen ?? true,
         amenities: Array.isArray(c.amenities) ? c.amenities : [],
         description: c.description || "",
         raw: c,
-      };
-    });
-  }, [campaignData]);
+      }
+    })
+  }, [campaignData])
 
   const filteredBusinesses = useMemo(() => {
     const filtered = normalized.filter((b) => {
-      if (selectedCategory !== "All" && b.category !== selectedCategory) return false;
+      if (selectedCategory !== "All" && b.category.toLowerCase() !== selectedCategory.toLowerCase()) return false
       if (selectedCity !== "All Cities" && !(b.location || "").toLowerCase().includes(selectedCity.toLowerCase()))
-        return false;
-      if (b.priceRange[0] > priceRange[1] || b.priceRange[1] < priceRange[0]) return false;
-      if ((b.rating || 0) < minRating) return false;
-      if (openOnly && !b.isOpen) return false;
-      if (selectedAmenities.length > 0 && b.amenities?.length) {
-        const hasAll = selectedAmenities.every((a) => b.amenities.includes(a));
-        if (!hasAll) return false;
+        return false
+
+         if (selectedCities.length > 0) {
+        const hasCityMatch = b.cities.some((businessCity) =>
+          selectedCities.some((selectedCity) => businessCity.toLowerCase() === selectedCity.toLowerCase()),
+        )
+        if (!hasCityMatch) return false
       }
-      return true;
-    });
+      if (b.priceRange[0] > priceRange[1] || b.priceRange[1] < priceRange[0]) return false
+      if ((b.rating || 0) < minRating) return false
+      if (openOnly && !b.isOpen) return false
+      if (selectedAmenities.length > 0 && b.amenities?.length) {
+        const hasAll = selectedAmenities.every((a) => b.amenities.includes(a))
+        if (!hasAll) return false
+      }
+      return true
+    })
 
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "rating":
-          return (b.rating || 0) - (a.rating || 0);
+          return (b.rating || 0) - (a.rating || 0)
         case "price-low":
-          return a.priceRange[0] - b.priceRange[0];
+          return a.priceRange[0] - b.priceRange[0]
         case "price-high":
-          return b.priceRange[1] - a.priceRange[1];
+          return b.priceRange[1] - a.priceRange[1]
         case "reviews":
-          return (b.reviews || 0) - (a.reviews || 0);
+          return (b.reviewCount || 0) - (a.reviewCount || 0)
         default:
-          return 0;
+          return 0
       }
-    });
+    })
 
-    return filtered;
-  }, [normalized, selectedCategory, selectedCity, selectedAmenities, priceRange, minRating, openOnly, sortBy]);
+    return filtered
+  }, [normalized, selectedCategory, selectedCity,selectedCities, selectedAmenities, priceRange, minRating, openOnly, sortBy])
 
   const handleAmenityChange = (amenity, checked) => {
-    setSelectedAmenities((prev) => (checked ? [...prev, amenity] : prev.filter((a) => a !== amenity)));
-  };
+    setSelectedAmenities((prev) => (checked ? [...prev, amenity] : prev.filter((a) => a !== amenity)))
+  }
 
+    const handleCityChange = (city, checked) => {
+    setSelectedCities((prev) => (checked ? [...prev, city] : prev.filter((c) => c !== city)))
+  }
   const clearAllFilters = () => {
-    setSelectedCategory("All");
-    setSelectedCity("All Cities");
-    setSelectedAmenities([]);
-    setPriceRange([0, 100000]);
-    setMinRating(0);
-    setOpenOnly(false);
-  };
+    setSelectedCategory("All")
+    setSelectedCity("All Cities")
+     setSelectedCities([])
+    setSelectedAmenities([])
+    setPriceRange([0, 100000])
+    setMinRating(0)
+    setOpenOnly(false)
+  }
+
 
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
-    ));
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+      />
+    ))
+
+  const getAverageRating = (reviews) => {
+    if (!Array.isArray(reviews) || reviews.length === 0) return 0
+    const total = reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0)
+    return (total / reviews.length).toFixed(1)
+  }
 
   const FilterSidebar = () => (
     <div className="w-full lg:w-66 bg-white border-r border-gray-200 p-6 space-y-6">
@@ -137,17 +216,17 @@ export default function BusinessDirectory() {
         </Button>
       </div>
 
-      {/* Categories */}
       <div>
         <h3 className="font-medium text-gray-900 mb-3">Categories</h3>
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-64 overflow-y-auto">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                selectedCategory === category ? "bg-blue-50 text-blue-700 border border-blue-200" : "text-gray-600 hover:bg-gray-50"
-              }`}
+              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors capitalize ${selectedCategory.toLowerCase() === category.toLowerCase()
+                ? "bg-blue-50 text-blue-700 border border-blue-200"
+                : "text-gray-600 hover:bg-gray-50"
+                }`}
             >
               {category}
             </button>
@@ -156,21 +235,23 @@ export default function BusinessDirectory() {
       </div>
 
       {/* City */}
-      <div>
-        <h3 className="font-medium text-gray-900 mb-3">City</h3>
-        <div>
-          <Select value={selectedCity} onValueChange={setSelectedCity}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((city) => (
-                <SelectItem key={city} value={city}>
-                  {city}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+        <h3 className="font-medium text-gray-900 mb-3">
+          Cities {selectedCities.length > 0 && <span className="text-blue-600">({selectedCities.length})</span>}
+        </h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {allAvailableCities.map((city) => (
+            <div key={city} className="flex items-center space-x-2">
+              <Checkbox
+                id={`city-${city}`}
+                checked={selectedCities.some((sc) => sc.toLowerCase() === city.toLowerCase())}
+                onCheckedChange={(checked) => handleCityChange(city, Boolean(checked))}
+              />
+              <label htmlFor={`city-${city}`} className="text-sm text-gray-600 capitalize cursor-pointer">
+                {city}
+              </label>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -182,24 +263,7 @@ export default function BusinessDirectory() {
         </label>
       </div>
 
-      {/* Amenities */}
-      <div>
-        <h3 className="font-medium text-gray-900 mb-3">Amenities</h3>
-        <div className="space-y-2">
-          {amenities.map((amenity) => (
-            <div key={amenity} className="flex items-center space-x-2">
-              <Checkbox
-                id={amenity}
-                checked={selectedAmenities.includes(amenity)}
-                onCheckedChange={(checked) => handleAmenityChange(amenity, Boolean(checked))}
-              />
-              <label htmlFor={amenity} className="text-sm text-gray-600">
-                {amenity}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
+ 
 
       {/* Price Filter (INR) */}
       <div>
@@ -209,7 +273,14 @@ export default function BusinessDirectory() {
             <span>₹{priceRange[0]}</span>
             <span>₹{priceRange[1]}</span>
           </div>
-          <Slider value={priceRange} onValueChange={(v) => setPriceRange(v)} max={100000} min={0} step={500} className="w-full" />
+          <Slider
+            value={priceRange}
+            onValueChange={(v) => setPriceRange(v)}
+            max={100000}
+            min={0}
+            step={500}
+            className="w-full"
+          />
         </div>
       </div>
 
@@ -221,9 +292,8 @@ export default function BusinessDirectory() {
             <button
               key={rating}
               onClick={() => setMinRating(rating)}
-              className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded transition-colors ${
-                minRating === rating ? "bg-blue-50" : "hover:bg-gray-50"
-              }`}
+              className={`flex items-center space-x-2 w-full text-left px-2 py-1 rounded transition-colors ${minRating === rating ? "bg-blue-50" : "hover:bg-gray-50"
+                }`}
             >
               <div className="flex">{renderStars(rating)}</div>
               <span className="text-sm text-gray-600">{rating === 0 ? "All" : `${rating}+ stars`}</span>
@@ -232,7 +302,7 @@ export default function BusinessDirectory() {
         </div>
       </div>
     </div>
-  );
+  )
 
   return (
     <>
@@ -291,45 +361,70 @@ export default function BusinessDirectory() {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredBusinesses.map((b) => (
-                <Card key={b.id} className="overflow-hidden hover:shadow-lg transition-shadow !py-0">
-                  <div className="relative h-48 overflow-hidden">
-                    <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full " />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900 text-lg leading-tight">{b.title}</h3>
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{b.category}</span>
-                    </div>
+              {filteredBusinesses.map((b, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    ease: "easeOut",
+                  }}
+                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                >
 
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex">{renderStars(b.rating)}</div>
-                      <span className="text-sm text-gray-600">
-                        {b.rating} ({b.reviews} reviews)
-                      </span>
+                  <Link href={`/product-details/${b.id}`} key={b.id} className="overflow-hidden  transition- !py-0">
+                    <div className="relative">
+                      <motion.img
+                        src={b.image}
+                        alt={b.title}
+                        className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                        whileHover={{ scale: 1.05 }}
+                      />
+                      {/* <img src={b.image || "/placeholder.svg"} alt={b.title} className="w-full h-48 object-cover" /> */}
                     </div>
+                    <CardContent className="p-4 ">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-lg leading-tight py-2">{b.title}</h3>
+                        {/* <span className="px-3 py-1 rounded-full text-xs font-medium text-white bg-blue-500 capitalize">
+                          {b.category}
+                        </span> */}
+                      </div>
 
-                    <div className="flex items-center gap-1 mb-3">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        {b.location}
-                        {b.country ? `, ${b.country}` : ""}
-                      </span>
-                    </div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex">
+                          {renderStars(b.reviews.length > 0 ? getAverageRating(b.reviews) : b.rating)}
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          {b.reviews.length > 0 ? getAverageRating(b.reviews) : b.rating} ({b.reviewCount} reviews)
+                        </span>
+                      </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-lg text-gray-900">
-                        ₹{b.priceRange[0].toLocaleString()}
-                        {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
-                      </span>
-                      <Button size="sm">
-                      <Link href={`/product-details/${b.id}`}>
-                      View Details
-                      </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+
+
+                      <div className="flex items-center gap-1 mb-3">
+                        <MapPin className="-4 h-4 text-primary" />
+                        <span className="text-sm text-gray-600">
+                          {b.location}
+                          {b.country ? `, ${b.country}` : ""}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-lg text-gray-900">
+                          ₹{b.priceRange[0].toLocaleString()}
+                          {b.priceRange[1] !== b.priceRange[0] ? ` - ₹${b.priceRange[1].toLocaleString()}` : ""}
+                        </span>
+                        <Button size="sm">
+                          <Link href={`/product-details/${b.id}`}>View Details</Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Link>
+                </motion.div>
+
               ))}
             </div>
 
@@ -348,5 +443,5 @@ export default function BusinessDirectory() {
       </div>
       <Footer />
     </>
-  );
+  )
 }
